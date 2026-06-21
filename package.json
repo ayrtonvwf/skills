@@ -1,0 +1,25 @@
+{
+  "name": "skills",
+  "version": "1.0.0",
+  "description": "A personal collection of [agent skills](https://docs.claude.com/en/docs/claude-code/skills) - reusable, self-contained instruction sets that an AI agent loads on demand to perform a specific task well and consistently. They follow the portable `SKILL.md` format, so they work across agent harnesses (Claude Code, GitHub Copilot, Cursor, OpenCode, and others), not a single tool.",
+  "homepage": "https://github.com/ayrtonvwf/skills#readme",
+  "bugs": {
+    "url": "https://github.com/ayrtonvwf/skills/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ayrtonvwf/skills.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "scripts": {
+    "prepare": "husky",
+    "test": "echo \"Error: no test specified\""
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
+    "husky": "^9.1.7"
+  }
+}
