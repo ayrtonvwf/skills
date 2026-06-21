@@ -64,7 +64,8 @@ tool from the preferences for each.
    files. Use this only to sanity-check scope and whether tests were touched - **not**
    to critique code. Skip lockfiles, generated files, and pure renames; sample if the
    MR is huge.
-4. **Commits** - commit count + messages for hygiene/atomicity.
+4. **Commits** - use the commit summary already included in the MR metadata (step 1) for
+   hygiene/atomicity signal (commit count / addition summary).
 5. **CI status** - latest pipeline state for the MR (pass/fail/none).
 6. **Evaluate** against the rubric in `reference/rubric.md`.
 7. **Write the report** to a new file (see Output) using `reference/report-template.md`.

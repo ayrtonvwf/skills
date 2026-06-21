@@ -13,7 +13,6 @@ the user's request still wins over this file (see precedence in `SKILL.md`).
   - `get_merge_request`
   - `list_merge_request_changed_files`
   - `get_merge_request_file_diff`
-  - `list_merge_request_commits`
   - `list_merge_request_discussions`
   - `list_merge_request_pipelines`
   - `list_pipelines`
