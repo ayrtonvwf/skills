@@ -1,0 +1,88 @@
+---
+name: mr-feedback
+description: Use this skill to evaluate the quality of a GitLab Merge Request and produce a feedback report ready to paste as an MR note. Trigger when the user asks for MR feedback, an MR quality review, or an MR report.
+---
+
+# mr-feedback
+
+Fetch a GitLab Merge Request, evaluate how **ready it is to be reviewed**, and write
+a feedback report to a new markdown file that can be copied straight into an MR note.
+
+## What to do
+
+Judge **review-readiness**. Check whether the MR has the context, scope clarity, testing
+instructions, and reviewer guidance that let a reviewer pick it up efficiently.
+
+## Why
+
+A well-prepared MR signals care and gets reviewed faster and better. The report should make
+a good MR feel recognized and give a weaker one concrete, encouraging steps to raise its readiness.
+
+## What not to do
+
+**Do not review or critique the code itself and do not suggest code/logic changes**
+
+## Preferences
+
+Before doing anything else, read `assets/preferences.md` (relative to this skill).
+It is the source of truth for all configurable behavior — output language, tone,
+fetch method, allowed tools, and output path. This SKILL.md does **not** restate
+those values; always read them from the preferences file.
+
+Precedence, highest to lowest:
+
+1. An explicit instruction in the user's current request (e.g. "this time write it in Portuguese").
+2. `assets/preferences.md`.
+3. Instructions in this skill.
+
+## Inputs
+
+The user provides one of:
+
+- A full MR URL: `https://gitlab.com/<group>/<subgroup>/<project>/-/merge_requests/<iid>`
+- A project path + MR iid: `group/subgroup/project` + `42`
+
+Parse from the URL:
+
+- `project_id` = the path between the host and `/-/merge_requests/` (URL-encode as
+  `group%2Fsubgroup%2Fproject` when calling tools)
+- `mergeRequestIid` = the number after `/-/merge_requests/`
+
+If either is missing or ambiguous, ask before fetching.
+
+## Workflow
+
+Use the method and tools declared in `assets/preferences.md`. The steps below say
+**what information to gather and why**, not which tool to call — pick the matching
+tool from the preferences for each.
+
+1. **MR metadata** - title, description, author, state, source/target branch, draft
+   flag, labels, milestone, approvals, merge status.
+2. **Changed-file list** - paths + add/del counts; gives scope/size without pulling
+   every diff.
+3. **Sample diffs to confirm the description matches reality** - in batches of 3-5
+   files. Use this only to sanity-check scope and whether tests were touched - **not**
+   to critique code. Skip lockfiles, generated files, and pure renames; sample if the
+   MR is huge.
+4. **Commits** - commit count + messages for hygiene/atomicity.
+5. **CI status** - latest pipeline state for the MR (pass/fail/none).
+6. **Evaluate** against the rubric in `assets/rubric.md`.
+7. **Write the report** to a new file (see Output) using `assets/report-template.md`.
+8. Tell the user the file path and offer to refine tone/length before they copy/paste it.
+
+Read `assets/rubric.md` before scoring and `assets/report-template.md` before
+writing. Do not invent data - if a fetch returns nothing for a category (e.g. no
+pipeline), mark it "not available" rather than guessing.
+
+## Output
+
+Write to the output path declared in `assets/preferences.md`, resolving its
+placeholders and creating any folders the path needs.
+
+## Guardrails
+
+- **Read-only.** This skill never posts notes, approves, or modifies the MR. It
+  only writes a local markdown file. The user decides whether to paste it.
+- Do not include secrets/tokens that may appear in diffs in the report.
+- If the MR is a draft or has no diff yet, you can still judge it and
+  generate the report, but make sure to be explicit about it.
