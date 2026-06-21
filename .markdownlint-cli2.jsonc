@@ -1,0 +1,23 @@
+{
+  // Files/globs to skip
+  "ignores": [
+    "node_modules",
+    "**/node_modules"
+  ],
+  // Rule configuration (https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md)
+  "config": {
+    "default": true,
+    // Allow long lines (skills/docs often have long URLs and prose)
+    "MD013": false,
+    // Allow inline HTML
+    "MD033": false,
+    // Allow duplicate headings in different sections
+    "MD024": { "siblings_only": true },
+    // Allow bold text used as standalone emphasis (intentional in skill content)
+    "MD036": false,
+    // First line in file doesn't have to be a top-level heading
+    "MD041": false,
+    // Tables: compact pipe spacing, with delimiter row pipes aligned to the header
+    "MD060": { "style": "compact", "aligned_delimiter": true }
+  }
+}

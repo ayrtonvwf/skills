@@ -5,7 +5,7 @@
 [one or two sentences on the headline reason]
 
 | Area | Score | Note |
-| - | - | - |
+| ---- | ----- | ---- |
 | Required readiness items | [n]/10 | [Jira link / test instructions / proof-of-run] |
 | Description & context | [n]/10 | [short] |
 | Scope & size | [n]/10 | ... |

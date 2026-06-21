@@ -14,12 +14,14 @@ by reading them.
 
 - Each skill is a folder under `skills/`: `skills/<skill-name>/SKILL.md`.
 - `SKILL.md` starts with YAML frontmatter:
+
   ```yaml
   ---
   name: <kebab-case, matches folder name>
   description: <when to use this skill - written so an agent can trigger it>
   ---
   ```
+
 - Supporting material lives in one of two sibling folders, split by **who consumes
   the file**:
   - `skills/<skill-name>/reference/` - docs **the agent reads into context to reason**:

@@ -8,7 +8,7 @@ others), not a single tool.
 
 ## Layout
 
-```
+```text
 skills/
 └── skills/
     └── <skill-name>/
@@ -55,7 +55,7 @@ documented here so new skills have a consistent home for runnable helpers.
 ## Available skills
 
 | Skill | What it does |
-|-------|--------------|
+| ----- | ------------ |
 | [mr-feedback](skills/mr-feedback/SKILL.md) | Evaluates how ready a GitLab Merge Request is to be reviewed (via the GitLab MCP) and writes a paste-ready feedback report. Not a code review - it judges context, scope, tests acknowledgement, and reviewer guidance. |
 
 ## Installing

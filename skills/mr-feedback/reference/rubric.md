@@ -74,11 +74,11 @@ overall score down and must always surface as an `[important]` item in the repor
 - Map the overall score to a label:
 
 | Score | Label | Meaning |
-|-------|-------|---------|
+| ----- | ----- | ------- |
 | 9-10 | Ready | Reviewer can pick it up immediately. |
-| 7-8  | Almost ready | Solid; a couple of additions would help the reviewer. |
-| 4-6  | Needs prep | Missing context/tests/scope clarity; readiness gaps to close first. |
-| 0-3  | Not ready | No reviewable content, or no context at all. |
+| 7-8 | Almost ready | Solid; a couple of additions would help the reviewer. |
+| 4-6 | Needs prep | Missing context/tests/scope clarity; readiness gaps to close first. |
+| 0-3 | Not ready | No reviewable content, or no context at all. |
 
 Be honest but encouraging. The goal is to help the author present an MR that gets
 reviewed faster - not to gatekeep.
