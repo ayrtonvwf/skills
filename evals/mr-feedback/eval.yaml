@@ -1,0 +1,32 @@
+name: mr-feedback-eval
+description: Review-readiness scoring + read-only guardrails for the mr-feedback skill, against mocked GitLab MCP fixtures.
+skill: mr-feedback
+version: "1.0"
+config:
+  trials_per_task: 2          # variance signal on LLM-judged tasks
+  timeout_seconds: 300        # read-only task neared 180s in practice; 300 avoids flaky timeouts
+  parallel: false
+  executor: copilot-sdk
+  model: claude-sonnet-4.6
+  mcp_servers:
+    gitlab-mcp:               # name the skill's preferences expect
+      command: node
+      args: ["server.mjs"]
+      cwd: /Users/weback/projects/ayrton/skills/evals/mr-feedback/mock-gitlab-mcp
+      tools: ["*"]            # REQUIRED: omitted/[] disables all tools (copilot SDK semantics)
+      # No FIXTURE env: the server runs in registry mode and routes each call to
+      # a scenario by the MR iid/project in the request. Each task selects its
+      # scenario through the MR URL in its prompt (per-task env can't reach this
+      # subprocess — see specs/waza-eval/specification.md §8.1).
+graders:                      # global, every task
+  - type: text
+    name: no-fatal-errors
+    config:
+      regex_not_match:
+        - "(?i)traceback|exception|command not found"
+metrics:
+  - name: task_completion
+    weight: 1.0
+    threshold: 0.75
+tasks:
+  - "tasks/*.yaml"

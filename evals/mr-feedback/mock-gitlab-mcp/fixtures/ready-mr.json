@@ -1,0 +1,54 @@
+{
+  "get_merge_request": {
+    "iid": 42,
+    "project_id": "acme/web-app",
+    "title": "Add CSV export to the reports dashboard",
+    "description": "## What & why\n\nAdds a \"Download CSV\" button to the reports dashboard so analysts can export the\ncurrent filtered view. Resolves the long-standing request to get data out of the UI\nwithout a DBA.\n\nJira: https://acme.atlassian.net/browse/RPT-318\n\n## How to test\n\n1. `npm install && npm run dev`\n2. Open `/reports`, apply any date filter.\n3. Click **Download CSV** and confirm the file matches the on-screen rows.\n4. Run `npm test -- reports-export` to exercise the unit tests.\n\n## Proof it was run\n\nScreenshot of the exported file opened in a spreadsheet, plus the passing test log:\n\n```\nPASS  src/reports/export.test.ts (12 tests)\n  ✓ serializes filtered rows to CSV\n  ✓ escapes commas and quotes\nTest Suites: 1 passed, Tests: 12 passed\n```\n\n![exported csv screenshot](https://acme.gitlab.io/uploads/csv-export.png)\n\n## Notes for reviewer\n\nStart in `src/reports/export.ts` (core logic); the component wiring in\n`ReportsToolbar.tsx` is thin. No breaking changes, no migrations.",
+    "author": { "username": "jdoe", "name": "Jane Doe" },
+    "state": "opened",
+    "source_branch": "feature/csv-export",
+    "target_branch": "main",
+    "work_in_progress": false,
+    "draft": false,
+    "labels": ["feature", "reports"],
+    "milestone": { "title": "Q2 Analytics" },
+    "commits_count": 3,
+    "commit_summary": "3 commits: add CSV serializer, wire toolbar button, add tests",
+    "approvals": { "approvals_required": 1, "approvals_left": 1, "approved_by": [] },
+    "merge_status": "can_be_merged",
+    "detailed_merge_status": "mergeable",
+    "has_conflicts": false,
+    "diverged_commits_count": 0
+  },
+  "list_merge_request_changed_files": [
+    { "path": "src/reports/export.ts", "additions": 84, "deletions": 2 },
+    { "path": "src/reports/ReportsToolbar.tsx", "additions": 18, "deletions": 1 },
+    { "path": "src/reports/export.test.ts", "additions": 96, "deletions": 0 }
+  ],
+  "get_merge_request_file_diff": {
+    "src/reports/export.ts": "@@ -0,0 +1,84 @@\n+export function rowsToCsv(rows: Row[]): string {\n+  const header = Object.keys(rows[0] ?? {}).join(\",\");\n+  const body = rows.map(serializeRow).join(\"\\n\");\n+  return `${header}\\n${body}`;\n+}\n",
+    "src/reports/ReportsToolbar.tsx": "@@ -10,6 +10,23 @@\n+  <button onClick={onDownloadCsv}>Download CSV</button>\n",
+    "src/reports/export.test.ts": "@@ -0,0 +1,96 @@\n+import { rowsToCsv } from \"./export\";\n+test(\"serializes filtered rows to CSV\", () => {\n+  expect(rowsToCsv(sample)).toContain(\"id,name\");\n+});\n"
+  },
+  "list_merge_request_discussions": [
+    {
+      "id": "d1",
+      "notes": [
+        {
+          "id": 5001,
+          "author": { "username": "areviewer" },
+          "body": "Thanks for the clear testing steps and the screenshot — easy to pick up.",
+          "system": false,
+          "resolvable": true,
+          "resolved": true
+        }
+      ]
+    }
+  ],
+  "list_merge_request_pipelines": [
+    { "id": 9001, "status": "success", "ref": "feature/csv-export", "sha": "a1b2c3d4" }
+  ],
+  "list_pipelines": [
+    { "id": 9001, "status": "success", "ref": "feature/csv-export", "sha": "a1b2c3d4" }
+  ]
+}

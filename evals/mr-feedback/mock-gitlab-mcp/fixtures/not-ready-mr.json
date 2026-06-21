@@ -1,0 +1,40 @@
+{
+  "get_merge_request": {
+    "iid": 57,
+    "project_id": "acme/checkout-service",
+    "title": "fixes",
+    "description": "## What\n\n<!-- describe what changed -->\n\n## How to test\n\n<!-- steps -->\n\n## Screenshots\n\n<!-- if applicable -->",
+    "author": { "username": "newdev", "name": "New Dev" },
+    "state": "opened",
+    "source_branch": "fix/stuff",
+    "target_branch": "main",
+    "work_in_progress": false,
+    "draft": false,
+    "labels": [],
+    "milestone": null,
+    "commits_count": 6,
+    "commit_summary": "6 commits: wip, fix, more fixes, refactor, formatting, oops",
+    "approvals": { "approvals_required": 1, "approvals_left": 1, "approved_by": [] },
+    "merge_status": "cannot_be_merged",
+    "detailed_merge_status": "ci_must_pass",
+    "has_conflicts": false,
+    "diverged_commits_count": 4
+  },
+  "list_merge_request_changed_files": [
+    { "path": "src/checkout/payment.ts", "additions": 210, "deletions": 64 },
+    { "path": "src/checkout/cart.ts", "additions": 88, "deletions": 31 },
+    { "path": "src/utils/format.ts", "additions": 12, "deletions": 9 }
+  ],
+  "get_merge_request_file_diff": {
+    "src/checkout/payment.ts": "@@ -40,12 +40,60 @@\n+  // TODO: clean this up before merge\n+  function chargeCard(amount) {\n+    console.log(\"charging\", amount);\n+    return gateway.charge(amount);\n+  }\n",
+    "src/checkout/cart.ts": "@@ -12,4 +12,40 @@\n+  function recalcTotals(cart) {\n+    return cart.items.reduce((a, i) => a + i.price, 0);\n+  }\n",
+    "src/utils/format.ts": "@@ -1,9 +1,12 @@\n-  export const fmt = (n) => n.toFixed(2);\n+  export const fmt = (n) => Number(n).toFixed(2);\n"
+  },
+  "list_merge_request_discussions": [],
+  "list_merge_request_pipelines": [
+    { "id": 9100, "status": "failed", "ref": "fix/stuff", "sha": "deadbeef" }
+  ],
+  "list_pipelines": [
+    { "id": 9100, "status": "failed", "ref": "fix/stuff", "sha": "deadbeef" }
+  ]
+}

@@ -1,0 +1,30 @@
+id: draft-mr-handled
+name: draft-mr-handled
+description: A draft MR with no diff yet is still scored, and the report explicitly acknowledges the draft / no-diff state.
+inputs:
+  prompt: |
+    Please give me MR feedback on this GitLab merge request:
+    https://gitlab.com/acme/offline-sync/-/merge_requests/73
+
+    Write the report to `report.md` in the current working directory.
+graders:
+  - type: skill_invocation
+    name: mr-feedback-ran
+    config:
+      required_skills: ["mr-feedback"]
+      mode: any_order
+      allow_extra: true
+  - type: file
+    name: report-acknowledges-draft
+    config:
+      must_exist: ["report.md"]
+      must_not_exist: []
+      content_patterns:
+        - path: "report.md"
+          must_match:
+            # The report is still produced (has an overall score line).
+            - "\\*\\*Overall: \\d+/10"
+            # The draft / no-diff state is acknowledged explicitly.
+            - "(?i)draft"
+            - "(?i)no (diff|code|changes)|nothing to review|no changed files|empty|spike"
+          must_not_match: []

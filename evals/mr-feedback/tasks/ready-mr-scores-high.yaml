@@ -1,0 +1,38 @@
+id: ready-mr-scores-high
+name: ready-mr-scores-high
+description: A well-prepared MR (Jira link, testing steps, proof-of-run, tests, green pipeline) scores high and raises no required-item flags.
+inputs:
+  prompt: |
+    Please give me MR feedback on this GitLab merge request:
+    https://gitlab.com/acme/web-app/-/merge_requests/42
+
+    Write the report to `report.md` in the current working directory.
+graders:
+  - type: trigger
+    name: triggers-on-mr
+    config:
+      skill_path: skills/mr-feedback/SKILL.md
+      mode: positive
+      threshold: 0.6
+  - type: skill_invocation
+    name: mr-feedback-ran
+    config:
+      required_skills: ["mr-feedback"]
+      mode: any_order
+      allow_extra: true
+  - type: file
+    name: report-scores-high
+    config:
+      must_exist: ["report.md"]
+      must_not_exist: []
+      content_patterns:
+        - path: "report.md"
+          must_match:
+            # Stable anchors: the Overall line (score + high label) and a template
+            # section header. The H1 title line is NOT asserted — the agent varies
+            # it ("# MR !42 - ..." vs "# MR Review-Readiness - ..."), see §7.2 note.
+            - "\\*\\*Overall: \\d+/10 - (Ready|Almost ready)\\*\\*"
+            - "## AI Transparency"
+          must_not_match:
+            # A well-prepared MR raises no required-item ([important]) flags.
+            - "\\*\\*\\[important\\]\\*\\*"

@@ -1,0 +1,51 @@
+id: not-ready-mr-flags-gaps
+name: not-ready-mr-flags-gaps
+description: A weak MR (template description, no tests, no proof-of-run, failed pipeline) scores low and surfaces the three required-readiness gaps.
+inputs:
+  prompt: |
+    Please give me MR feedback on this GitLab merge request:
+    https://gitlab.com/acme/checkout-service/-/merge_requests/57
+
+    Write the report to `report.md` in the current working directory.
+graders:
+  - type: skill_invocation
+    name: mr-feedback-ran
+    config:
+      required_skills: ["mr-feedback"]
+      mode: any_order
+      allow_extra: true
+  - type: file
+    name: report-flags-gaps
+    config:
+      must_exist: ["report.md"]
+      must_not_exist: []
+      content_patterns:
+        - path: "report.md"
+          must_match:
+            # Low label (score + Needs prep / Not ready).
+            - "\\*\\*Overall: \\d+/10 - (Needs prep|Not ready)\\*\\*"
+            # At least one required-readiness item flagged as [important].
+            - "\\*\\*\\[important\\]\\*\\*"
+            # The three required items must each surface by name.
+            - "(?i)jira"
+            - "(?i)testing instruction"
+            - "(?i)proof.?of.?run"
+          must_not_match: []
+  - type: prompt
+    name: gaps-framed-encouragingly
+    config:
+      model: claude-haiku-4.5
+      continue_session: false
+      prompt: |
+        You are grading an MR review-readiness report written for a weak merge request
+        (empty template description, no tests, no proof-of-run, failing pipeline).
+        PASS only if ALL of the following hold:
+        - It does NOT critique the code itself or suggest code/logic changes (it judges
+          review-readiness, not correctness).
+        - The tone is collaborative and encouraging, not gatekeeping.
+        - The overall label is consistent with the rubric for a weak MR — "Needs prep"
+          or "Not ready" (not "Ready"/"Almost ready").
+        - It names the missing required items (Jira link, testing instructions,
+          proof-of-run) as gaps to close.
+        Call set_waza_grade_pass(description, reason) if all hold, otherwise call
+        set_waza_grade_fail(description, reason).
