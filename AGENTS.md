@@ -54,6 +54,11 @@ by reading them.
   user asks for another language.
 - **Don't invent data.** Skills that fetch from external tools (e.g. MCP servers)
   must mark missing data as unavailable rather than guessing.
+- **Lint markdown before finishing.** After editing any `.md` file, run
+  `npm run lint:fix` to auto-fix what it can, then run `npm run lint` and resolve
+  any remaining errors by hand. Do not consider a task complete while `npm run lint`
+  reports errors. A Claude Code `Stop` hook enforces this, but fix proactively rather
+  than waiting for it to block.
 
 ## When adding or editing a skill
 
