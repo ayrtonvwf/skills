@@ -17,7 +17,6 @@ the user's request still wins over this file (see precedence in `SKILL.md`).
   - `list_merge_request_discussions`
   - `list_merge_request_pipelines`
   - `list_pipelines`
-  - ``
 - **Output path** — write to `${CWD}/mr-feedback/<project-slug>-mr-<iid>-<YYYY-MM-DD>-<TIMESTAMP>.md`.
   Placeholders: `${CWD}` = working directory, `<project-slug>` = last segment of the
   project path, `<iid>` = MR iid, `<YYYY-MM-DD>` = report date, `<TIMESTAMP>` = unix

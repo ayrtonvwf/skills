@@ -24,7 +24,7 @@ a good MR feel recognized and give a weaker one concrete, encouraging steps to r
 
 ## Preferences
 
-Before doing anything else, read `assets/preferences.md` (relative to this skill).
+Before doing anything else, read `reference/preferences.md` (relative to this skill).
 It is the source of truth for all configurable behavior — output language, tone,
 fetch method, allowed tools, and output path. This SKILL.md does **not** restate
 those values; always read them from the preferences file.
@@ -32,7 +32,7 @@ those values; always read them from the preferences file.
 Precedence, highest to lowest:
 
 1. An explicit instruction in the user's current request (e.g. "this time write it in Portuguese").
-2. `assets/preferences.md`.
+2. `reference/preferences.md`.
 3. Instructions in this skill.
 
 ## Inputs
@@ -52,7 +52,7 @@ If either is missing or ambiguous, ask before fetching.
 
 ## Workflow
 
-Use the method and tools declared in `assets/preferences.md`. The steps below say
+Use the method and tools declared in `reference/preferences.md`. The steps below say
 **what information to gather and why**, not which tool to call — pick the matching
 tool from the preferences for each.
 
@@ -66,17 +66,17 @@ tool from the preferences for each.
    MR is huge.
 4. **Commits** - commit count + messages for hygiene/atomicity.
 5. **CI status** - latest pipeline state for the MR (pass/fail/none).
-6. **Evaluate** against the rubric in `assets/rubric.md`.
-7. **Write the report** to a new file (see Output) using `assets/report-template.md`.
+6. **Evaluate** against the rubric in `reference/rubric.md`.
+7. **Write the report** to a new file (see Output) using `reference/report-template.md`.
 8. Tell the user the file path and offer to refine tone/length before they copy/paste it.
 
-Read `assets/rubric.md` before scoring and `assets/report-template.md` before
+Read `reference/rubric.md` before scoring and `reference/report-template.md` before
 writing. Do not invent data - if a fetch returns nothing for a category (e.g. no
 pipeline), mark it "not available" rather than guessing.
 
 ## Output
 
-Write to the output path declared in `assets/preferences.md`, resolving its
+Write to the output path declared in `reference/preferences.md`, resolving its
 placeholders and creating any folders the path needs.
 
 ## Guardrails
