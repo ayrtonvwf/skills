@@ -19,8 +19,11 @@
 
 ## To raise readiness
 
-- **[important]** [gap that meaningfully slows a reviewer down]
-- **[nice-to-have]** [smaller improvement]
+For each gap, state the fix and *why it matters* (draw the reason from the
+corresponding rubric category's **Reason**).
+
+- **[important]** [gap that meaningfully slows a reviewer down] — *Why it matters:* [reason from the rubric category]
+- **[nice-to-have]** [smaller improvement] — *Why it matters:* [reason from the rubric category]
 
 ## Suggested next steps
 

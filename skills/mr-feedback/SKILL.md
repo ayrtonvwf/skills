@@ -75,6 +75,11 @@ Read `reference/rubric.md` before scoring and `reference/report-template.md` bef
 writing. Do not invent data - if a fetch returns nothing for a category (e.g. no
 pipeline), mark it "not available" rather than guessing.
 
+Each rubric category carries a **Reason** explaining why it matters to the author.
+When you report a gap in "To raise readiness", always include *why it matters* for
+the author, drawn from that category's Reason - so the feedback explains the purpose
+behind each request, not just the request itself.
+
 ## Output
 
 Write to the output path declared in `reference/preferences.md`, resolving its
