@@ -35,10 +35,16 @@ graders:
     name: gaps-framed-encouragingly
     config:
       model: claude-haiku-4.5
-      continue_session: false
+      # continue_session: true reuses the executor session by ID, so the judge
+      # inherits the workspace where the skill just wrote report.md. Without it the
+      # judge starts blank, has no report to read, calls neither grade tool, and the
+      # task resolves to score 0 / passed false (the F1 blind-judge bug).
+      continue_session: true
       prompt: |
-        You are grading an MR review-readiness report written for a weak merge request
-        (empty template description, no tests, no proof-of-run, failing pipeline).
+        In this session you just produced an MR review-readiness report and wrote it to
+        `report.md` in the current working directory. Read that `report.md` and grade it.
+        It was written for a weak merge request (empty template description, no tests, no
+        proof-of-run, failing pipeline).
         PASS only if ALL of the following hold:
         - It does NOT critique the code itself or suggest code/logic changes (it judges
           review-readiness, not correctness).

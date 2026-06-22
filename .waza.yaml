@@ -11,7 +11,7 @@ defaults:
   engine: copilot-sdk
   model: claude-sonnet-4.6
   timeout: 300
-  parallel: false
+  parallel: true
   workers: 4
   verbose: false
   sessionLog: false

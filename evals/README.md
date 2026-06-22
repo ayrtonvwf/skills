@@ -21,11 +21,17 @@ checked repeatably without touching live services.
   > approval kind"). This suite is verified on **0.37.0**.
 - **`copilot-sdk` auth.** The executor makes real model calls via GitHub Copilot. There is
   no `waza login`; verify with `waza models` — if it lists models, auth is wired.
-- **Node.js** for the mock MCP server. Install its deps once:
+- **Node.js** for the mock MCP server. Install its deps once, then point the suite at this
+  clone's copy of the server (see the `cwd` gotcha below):
 
   ```bash
   npm --prefix evals/mr-feedback/mock-gitlab-mcp install
+  npm --prefix evals/mr-feedback/mock-gitlab-mcp run sync-eval-cwd
   ```
+
+  `sync-eval-cwd` rewrites the one machine-specific line in `eval.yaml` (the MCP server's
+  absolute `cwd`) to this checkout's path. It is idempotent - a no-op if already correct -
+  and is the setup step that makes the suite portable across machines and CI.
 
 ## Running
 
@@ -41,8 +47,22 @@ waza run evals/mr-feedback/eval.yaml \
 ```
 
 `--judge-model` is only needed for the one `prompt` (LLM-as-judge) grader in
-`not-ready-mr-flags-gaps`; the other tasks use structural graders only. A run passes when
-`task_completion` ≥ 0.75 across all tasks.
+`not-ready-mr-flags-gaps`; the other tasks use structural graders only.
+
+**Judge the suite by pass rate, not the aggregate `avg` score.** waza reports both
+`pass_rate` and `avg`; pin success on `pass_rate` — every grader passing across all tasks —
+and treat `avg`/`min_score`/`stddev` as diagnostics only. The aggregate is deliberately not
+the gate because a passing `negative`-mode `trigger` grader still reports a low raw number
+that drags `avg` down without meaning anything went wrong (see Gotchas). The
+`task_completion` metric's `threshold: 0.75` is a coarse floor, not the real bar.
+
+## Executor model
+
+The suite runs the skill against a **single executor model, `claude-sonnet-4.6`** (set in
+`eval.yaml` `config.model`). This is deliberate for now: it keeps runs cheap and the signal
+stable. The trade-off is that **cross-model robustness is untested** - whether the skill still
+follows the rubric under a weaker or different model is an open question. A multi-model matrix
+(`waza run … --model A --model B`) is a possible future addition, not a current requirement.
 
 ## How the mock GitLab MCP server works
 
@@ -86,11 +106,28 @@ write-up.
   but disables every tool — calls then return a null result. (`["*"]` = all, `[]` = none.)
 - **MCP server paths must be absolute.** Waza passes `mcp_servers` config to the SDK verbatim
   with no env expansion, and the server is spawned with the agent's temp workspace as its cwd.
-  `eval.yaml` therefore sets an absolute `cwd` to `mock-gitlab-mcp/`. If you clone this repo
-  elsewhere, update that `cwd` (it is the one machine-specific line).
+  `eval.yaml` therefore sets an absolute `cwd` to `mock-gitlab-mcp/` - the one machine-specific
+  line. Do not hand-edit it: run `npm --prefix evals/mr-feedback/mock-gitlab-mcp run
+  sync-eval-cwd` to rewrite it to your checkout's path (idempotent; safe in CI before
+  `waza run`).
 - **Exposed MCP tool names are namespaced** as `gitlab-mcp-<tool>`. The `tool_constraint`
   grader matches tool names by case-insensitive regex, so its patterns match the bare tool
   substring regardless of the prefix.
+- **A `prompt` grader at `score: 0, passed: false` with feedback `"All prompts passed"`
+  means the judge never graded — it is not a real pass.** That feedback string is the
+  signature of a judge that returned no `set_waza_grade_pass`/`set_waza_grade_fail` verdict
+  (e.g. it had no report to read). Per waza's scoring (`score = passes / (passes + failures)`,
+  so `0/0 → 0`), an ungraded prompt grader always resolves to score 0. If you see a 0-score
+  "passed" prompt grader, suspect a blind judge, not a flaky model — confirm the grader sets
+  `continue_session: true` (or otherwise feeds the report to the judge) so it actually reads
+  the artifact it is grading.
+- **A passing `negative` trigger grader reports raw probability, not a pass score.** The
+  `does-not-trigger` grader in `anti-trigger-non-mr` (mode `negative`, threshold 0.60)
+  **passes** when the trigger probability is below the threshold, but it contributes that raw
+  probability (e.g. 0.125) to the task's aggregate — pulling the task `avg` down (~0.78) and
+  inflating suite `stddev`/lowering `min_score`. The classification is correct; the number is
+  misleading. Interpret this grader as pass/fail, not by its averaged score (this is why suite
+  success is pinned on `pass_rate`, not `avg` — see Running).
 - **Report content is asserted via `file.content_patterns`, not `text`.** Each MR task pins
   the output to `report.md` (the skill lets an explicit request override its default path) so
   the `file` grader — which has no glob — can target a known path. The stable content anchors

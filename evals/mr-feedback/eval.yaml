@@ -12,6 +12,10 @@ config:
     gitlab-mcp:               # name the skill's preferences expect
       command: node
       args: ["server.mjs"]
+      # Absolute path REQUIRED (Waza passes this verbatim, no env expansion, and spawns the
+      # server in the agent's temp workspace). It is therefore machine-specific. On any other
+      # clone or in CI, regenerate this line:
+      #   npm --prefix evals/mr-feedback/mock-gitlab-mcp run sync-eval-cwd
       cwd: /Users/weback/projects/ayrton/skills/evals/mr-feedback/mock-gitlab-mcp
       tools: ["*"]            # REQUIRED: omitted/[] disables all tools (copilot SDK semantics)
       # No FIXTURE env: the server runs in registry mode and routes each call to
@@ -23,7 +27,12 @@ graders:                      # global, every task
     name: no-fatal-errors
     config:
       regex_not_match:
-        - "(?i)traceback|exception|command not found"
+        # Anchored to real fatal-error signatures, NOT bare English words:
+        # "exception" alone matched "exceptionally" in the agent's prose and
+        # flaked this suite at 50%. Match the Python traceback header, an
+        # "...Exception:" class line (covers RuntimeException:, etc.), and the
+        # shell "command not found" message.
+        - "(?i)traceback \\(most recent call last\\)|\\w*exception:|command not found"
 metrics:
   - name: task_completion
     weight: 1.0

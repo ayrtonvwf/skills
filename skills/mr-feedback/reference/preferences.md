@@ -17,6 +17,16 @@ the user's request still wins over this file (see precedence in `SKILL.md`).
   - `list_merge_request_pipelines`
   - `list_pipelines`
 - **Output path** — write to `${CWD}/mr-feedback/<project-slug>-mr-<iid>-<YYYY-MM-DD>-<TIMESTAMP>.md`.
-  Placeholders: `${CWD}` = working directory, `<project-slug>` = last segment of the
-  project path, `<iid>` = MR iid, `<YYYY-MM-DD>` = report date, `<TIMESTAMP>` = unix
-  seconds (keeps repeat runs of the same MR from overwriting each other).
+  Placeholders:
+  - `${CWD}` = current working directory.
+  - `<project-slug>` = the **last segment** of the project path (for
+    `group/subgroup/checkout-service` this is `checkout-service`).
+  - `<iid>` = the MR iid.
+  - `<YYYY-MM-DD>` = today's date in the local timezone.
+  - `<TIMESTAMP>` = current Unix time in seconds (keeps repeat runs of the same MR from
+    overwriting each other).
+
+  Do **not** guess the date or timestamp. Read them from the system clock (e.g.
+  `date +%Y-%m-%d` and `date +%s`) so the filename reflects the real run time. Create the
+  `mr-feedback/` folder if it does not exist. Example resolved path:
+  `./mr-feedback/checkout-service-mr-57-2026-06-21-1750000000.md`.

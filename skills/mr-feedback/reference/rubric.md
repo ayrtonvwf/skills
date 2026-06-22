@@ -8,6 +8,23 @@ Premise to keep in tone: a well-prepared MR signals care. Reviewers prioritize M
 that are easy to pick up, so readiness is not bureaucracy - it gets the MR reviewed
 faster and better.
 
+## The code-critique boundary
+
+Noting that a readiness signal exists is in scope; instructing how to change the code
+is not. You may **point out that** hygiene markers (leftover TODOs, debug logs,
+commented-out blocks) are present in the diff, because their presence is a
+self-review/readiness signal. You may **not** tell the author how to edit the code -
+no "remove line X", no "rename this", no "use Y instead". Keep it to "this is here,
+resolving it before review will help", never "here is the change to make".
+
+- Allowed: "There are leftover debug/TODO markers in the diff (e.g. a `console.log` and
+  a `// TODO`) - calling them out or clearing them before review will help."
+- Disallowed: "Remove the `console.log("charging", amount)` and the
+  `// TODO: clean this up` from `payment.ts`."
+- Allowed: "The diff mixes a refactor with the feature; a note on what to review first
+  would help."
+- Disallowed: "Split this function" / "rename `foo` to `bar`" / "this should use a map."
+
 ## Categories
 
 Score each 0-10, then combine into an overall score (weighted; high-weight gaps
