@@ -1,0 +1,28 @@
+{
+  "get_merge_request": {
+    "iid": 73,
+    "project_id": "acme/offline-sync",
+    "title": "Draft: spike on offline sync",
+    "description": "Opening early to share direction. Still spiking — nothing to review yet.\n\nWill add Jira link, testing steps and proof once the approach settles.",
+    "author": { "username": "ksmith", "name": "Kim Smith" },
+    "state": "opened",
+    "source_branch": "spike/offline-sync",
+    "target_branch": "main",
+    "work_in_progress": true,
+    "draft": true,
+    "labels": ["spike"],
+    "milestone": null,
+    "commits_count": 1,
+    "commit_summary": "1 commit: scaffold offline sync module (empty)",
+    "approvals": { "approvals_required": 1, "approvals_left": 1, "approved_by": [] },
+    "merge_status": "cannot_be_merged",
+    "detailed_merge_status": "draft_status",
+    "has_conflicts": false,
+    "diverged_commits_count": 0
+  },
+  "list_merge_request_changed_files": [],
+  "get_merge_request_file_diff": {},
+  "list_merge_request_discussions": [],
+  "list_merge_request_pipelines": [],
+  "list_pipelines": []
+}

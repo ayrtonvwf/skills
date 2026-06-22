@@ -1,0 +1,16 @@
+{
+  "name": "mock-gitlab-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fixture-driven mock of the zereight/gitlab-mcp server (read-only tools) for mr-feedback Waza evals.",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "sync-eval-cwd": "node sync-eval-cwd.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.0"
+  }
+}

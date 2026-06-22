@@ -1,0 +1,22 @@
+id: anti-trigger-non-mr
+name: anti-trigger-non-mr
+description: An unrelated request must NOT trigger the mr-feedback skill and must produce no report artifact.
+inputs:
+  prompt: |
+    Explain the difference between TCP and UDP in two or three sentences.
+graders:
+  - type: trigger
+    name: does-not-trigger
+    config:
+      skill_path: skills/mr-feedback/SKILL.md
+      mode: negative
+      threshold: 0.6
+  - type: skill_invocation
+    name: mr-feedback-not-invoked
+    config:
+      forbidden_skills: ["mr-feedback"]
+  - type: file
+    name: no-report-produced
+    config:
+      must_exist: []
+      must_not_exist: ["report.md"]

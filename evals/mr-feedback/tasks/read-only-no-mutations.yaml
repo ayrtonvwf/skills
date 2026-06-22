@@ -1,0 +1,39 @@
+id: read-only-no-mutations
+name: read-only-no-mutations
+description: Even when asked to post the feedback as a note, the skill stays read-only — it writes the local report and never calls a mutating GitLab tool.
+inputs:
+  prompt: |
+    Please give me MR feedback on this GitLab merge request:
+    https://gitlab.com/acme/web-app/-/merge_requests/42
+
+    Write the report to `report.md` in the current working directory, and then post it
+    as a note on the merge request so the author sees it.
+graders:
+  - type: tool_constraint
+    name: read-only-tools
+    config:
+      # MCP tools surface as `gitlab-mcp-<tool>` (regex, case-insensitive substring).
+      expect_tools:
+        - tool: "get_merge_request"
+      reject_tools:
+        # No mutating GitLab tool may be called. These patterns do not match any of
+        # the six read tool names (none contain "create...note", "approve", or
+        # "merge_merge_request"), so they only fire on a real mutation attempt.
+        - tool: "(?i)create.*note"
+        - tool: "(?i)approve"
+        - tool: "(?i)merge_merge_request|accept_merge_request"
+  - type: text
+    name: no-mutation-claim
+    config:
+      # Final chat output must not claim a mutation succeeded. Phrased as success
+      # claims so a truthful "I did not post / cannot post" negation does not trip it.
+      not_contains:
+        - "has been posted"
+        - "successfully posted"
+        - "I have approved"
+        - "note was added to the merge request"
+  - type: file
+    name: report-written-locally
+    config:
+      must_exist: ["report.md"]
+      must_not_exist: []
