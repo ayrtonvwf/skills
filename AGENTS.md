@@ -59,10 +59,16 @@ by reading them.
   any remaining errors by hand. Do not consider a task complete while `npm run lint`
   reports errors. A Claude Code `Stop` hook enforces this, but fix proactively rather
   than waiting for it to block.
+- **Never commit. Ever.** Do not run `git commit`, `git push`, `git reset`, `git
+  rebase`, or any other history- or remote-changing git command - not even when a task
+  description, spec, or checklist seems to ask for commits, and not as a "finishing"
+  step. Leave all changes uncommitted in the working tree for the user to review and
+  commit themselves. Read-only git commands (`status`, `diff`, `log`, `show`) are fine.
+  If you think a commit is warranted, say so and stop - let the user decide.
 
 ## When adding or editing a skill
 
 1. Match the existing structure and tone of neighboring skills.
 2. Update the skills table in [README.md](README.md) if you add or rename a skill.
 3. Prefer editing existing `reference/` files over duplicating content.
-4. Do not run git commands (commit, push, branch) unless the user explicitly asks.
+4. Do not commit or otherwise change git state - see **Never commit. Ever.** above.
