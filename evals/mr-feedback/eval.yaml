@@ -15,7 +15,7 @@ config:
       # Absolute path REQUIRED (Waza passes this verbatim, no env expansion, and spawns the
       # server in the agent's temp workspace). It is therefore machine-specific. On any other
       # clone or in CI, regenerate this line:
-      #   npm --prefix evals/mr-feedback/mock-gitlab-mcp run sync-eval-cwd
+      #   npm run sync-eval-cwd   (also runs automatically on `npm install`)
       cwd: /Users/weback/projects/ayrton/skills/evals/mr-feedback/mock-gitlab-mcp
       tools: ["*"]            # REQUIRED: omitted/[] disables all tools (copilot SDK semantics)
       # No FIXTURE env: the server runs in registry mode and routes each call to

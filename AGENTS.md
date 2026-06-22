@@ -65,6 +65,9 @@ by reading them.
   step. Leave all changes uncommitted in the working tree for the user to review and
   commit themselves. Read-only git commands (`status`, `diff`, `log`, `show`) are fine.
   If you think a commit is warranted, say so and stop - let the user decide.
+- **Suggest a commit message when a task is complete.** After finishing a task,
+  propose a commit message (so the user can copy it) summarizing the changes. This is
+  a suggestion only - do not run `git commit` or otherwise change git state.
 
 ## When adding or editing a skill
 

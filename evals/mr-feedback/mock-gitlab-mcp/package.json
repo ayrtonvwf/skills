@@ -6,8 +6,7 @@
   "type": "module",
   "main": "server.mjs",
   "scripts": {
-    "start": "node server.mjs",
-    "sync-eval-cwd": "node sync-eval-cwd.mjs"
+    "start": "node server.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

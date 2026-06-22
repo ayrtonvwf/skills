@@ -26,12 +26,17 @@ checked repeatably without touching live services.
 
   ```bash
   npm --prefix evals/mr-feedback/mock-gitlab-mcp install
-  npm --prefix evals/mr-feedback/mock-gitlab-mcp run sync-eval-cwd
+  npm run sync-eval-cwd   # from the repo root
   ```
 
-  `sync-eval-cwd` rewrites the one machine-specific line in `eval.yaml` (the MCP server's
-  absolute `cwd`) to this checkout's path. It is idempotent - a no-op if already correct -
-  and is the setup step that makes the suite portable across machines and CI.
+  `sync-eval-cwd` (the repo-root [`scripts/sync-eval-cwd.mjs`](../scripts/sync-eval-cwd.mjs))
+  scans every `evals/*/eval.yaml` and rewrites the one machine-specific line in each (the MCP
+  server's absolute `cwd`) to this checkout's path. It is idempotent - a no-op if already
+  correct - and is the setup step that makes the suites portable across machines and CI. It
+  also runs automatically via the repo-root `postinstall` hook, so a plain `npm install` keeps
+  the suites pointed at the local checkout. New suites are covered automatically as long as
+  they keep their mock server under `evals/<suite>/` and reference it by a relative basename in
+  `eval.yaml`.
 
 ## Running
 
@@ -108,9 +113,9 @@ write-up.
 - **MCP server paths must be absolute.** Waza passes `mcp_servers` config to the SDK verbatim
   with no env expansion, and the server is spawned with the agent's temp workspace as its cwd.
   `eval.yaml` therefore sets an absolute `cwd` to `mock-gitlab-mcp/` - the one machine-specific
-  line. Do not hand-edit it: run `npm --prefix evals/mr-feedback/mock-gitlab-mcp run
-  sync-eval-cwd` to rewrite it to your checkout's path (idempotent; safe in CI before
-  `waza run`).
+  line. Do not hand-edit it: run `npm run sync-eval-cwd` (from the repo root) to rewrite it to
+  your checkout's path (idempotent; safe in CI before `waza run`, and also wired into
+  `postinstall`).
 - **Exposed MCP tool names are namespaced** as `gitlab-mcp-<tool>`. The `tool_constraint`
   grader matches tool names by case-insensitive regex, so its patterns match the bare tool
   substring regardless of the prefix.
