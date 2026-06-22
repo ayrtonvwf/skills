@@ -8,9 +8,9 @@
 //   payload, matching how zereight/gitlab-mcp returns data (spec §5.2).
 // - Params are validated against the required/optional sets; a missing required param is
 //   rejected by the schema the way production would reject it.
-// - The active scenario is selected by the FIXTURE env var (e.g. FIXTURE=ready-mr) and
-//   loaded from ./fixtures/<FIXTURE>.json. An unknown/missing fixture fails loudly at
-//   startup.
+// - The server runs in registry mode: every fixture in ./fixtures/ is loaded at startup
+//   and each tool call is routed to a scenario by the MR identifier in its arguments
+//   (merge_request_iid, falling back to project_id). A call for an unknown MR fails loudly.
 
 import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -54,21 +54,15 @@ function loadFixture(name) {
   return fixture;
 }
 
-// --- Scenario selection -----------------------------------------------------
+// --- Scenario selection (registry mode) -------------------------------------
 //
-// Two modes, in precedence order:
-//
-// 1. FIXTURE env var pins ONE scenario for every call (used by the standalone
-//    smoke test and any single-scenario run).
-// 2. Registry mode (no FIXTURE): every fixture in fixtures/ is loaded and each
-//    tool call is routed to a scenario by the MR identifier in its arguments
-//    (merge_request_iid, else project_id). This is what the Waza eval uses,
-//    because per-task env can't reach this subprocess — each eval task instead
-//    selects its scenario through the MR URL (iid/project) in its prompt.
-//
-// Either way the tool contract (names, params, response shape) is identical.
-
-const PINNED_FIXTURE = process.env.FIXTURE;
+// Every fixture in fixtures/ is loaded at startup and each tool call is routed
+// to a scenario by the MR identifier in its arguments (merge_request_iid, else
+// project_id). This is the single selection mechanism: a Waza eval task picks its
+// scenario through the MR URL (iid/project) in its prompt, and the standalone
+// smoke test does the same by passing an iid/project on each call. Per-task env
+// can't reach this subprocess, so routing by request identity is what lets one
+// server serve every task deterministically.
 
 // Registry indexed by MR iid and by project_id (raw + URL-decoded forms).
 const byIid = new Map();
@@ -89,21 +83,15 @@ function registerFixture(name, fixture) {
   }
 }
 
-let pinned = null;
-if (PINNED_FIXTURE) {
-  pinned = loadFixture(PINNED_FIXTURE);
-} else {
-  const files = readdirSync(FIXTURES_DIR).filter((f) => f.endsWith(".json"));
-  if (files.length === 0) {
-    console.error(`[mock-gitlab-mcp] No fixtures found in ${FIXTURES_DIR}. Aborting.`);
-    process.exit(1);
-  }
-  for (const f of files) registerFixture(f.replace(/\.json$/, ""), loadFixture(f.replace(/\.json$/, "")));
+const files = readdirSync(FIXTURES_DIR).filter((f) => f.endsWith(".json"));
+if (files.length === 0) {
+  console.error(`[mock-gitlab-mcp] No fixtures found in ${FIXTURES_DIR}. Aborting.`);
+  process.exit(1);
 }
+for (const f of files) registerFixture(f.replace(/\.json$/, ""), loadFixture(f.replace(/\.json$/, "")));
 
 // Resolve the active fixture for a single tool call from its arguments.
 function fixtureFor(args = {}) {
-  if (pinned) return pinned;
   if (args.merge_request_iid != null && byIid.has(String(args.merge_request_iid))) {
     return byIid.get(String(args.merge_request_iid));
   }
@@ -244,7 +232,5 @@ server.registerTool(
 const transport = new StdioServerTransport();
 await server.connect(transport);
 console.error(
-  pinned
-    ? `[mock-gitlab-mcp] connected (pinned FIXTURE=${PINNED_FIXTURE})`
-    : `[mock-gitlab-mcp] connected (registry mode; iids ${[...byIid.keys()].join(", ")})`,
+  `[mock-gitlab-mcp] connected (registry mode; iids ${[...byIid.keys()].join(", ")})`,
 );

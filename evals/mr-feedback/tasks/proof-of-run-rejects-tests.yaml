@@ -1,0 +1,56 @@
+id: proof-of-run-rejects-tests
+name: proof-of-run-rejects-tests
+description: An MR whose only "proof it was run" is a passing test log must still flag proof-of-run as missing, since passing tests are not proof the real code was run.
+inputs:
+  prompt: |
+    Please give me MR feedback on this GitLab merge request:
+    https://gitlab.com/acme/api-service/-/merge_requests/70
+
+    Write the report to `report.md` in the current working directory.
+graders:
+  - type: skill_invocation
+    name: mr-feedback-ran
+    config:
+      required_skills: ["mr-feedback"]
+      mode: any_order
+      allow_extra: true
+  - type: file
+    name: report-flags-proof-of-run
+    config:
+      must_exist: ["report.md"]
+      must_not_exist: []
+      content_patterns:
+        - path: "report.md"
+          must_match:
+            # Proof-of-run must surface as a gap despite the passing test log.
+            - "(?i)proof.?of.?run"
+            - "\\*\\*\\[important\\]\\*\\*"
+          must_not_match: []
+  - type: prompt
+    name: tests-not-accepted-as-proof
+    config:
+      model: claude-haiku-4.5
+      # continue_session reuses the executor workspace where report.md was written
+      # (without it the judge starts blank and resolves to a false 0 — the blind-judge bug).
+      continue_session: true
+      prompt: |
+        In this session you just produced an MR review-readiness report and wrote it to
+        `report.md` in the current working directory. Read that `report.md` and grade it.
+
+        The merge request it reviewed has a Jira link, clear testing instructions, test
+        files in the diff, and a green pipeline — but its ONLY "Proof it was run" is a
+        passing unit-test log. There is no screenshot of rendered UI and no log/output
+        from the real code actually running.
+
+        PASS only if ALL of the following hold:
+        - The report flags proof-of-run as a missing/required-readiness gap (an
+          `[important]` item), i.e. it does NOT accept the passing test log as valid
+          proof-of-run.
+        - Its "why it matters" for that gap is tailored to THIS specific problem —
+          it explains that a passing test run proves the tests ran, not that the real
+          code was exercised — rather than being a generic copy of a rubric reason.
+        - It does NOT wrongly flag the Jira link, testing instructions, or test
+          coverage as missing (those are all present).
+        - It does NOT critique the code itself or suggest code/logic changes.
+        Call set_waza_grade_pass(description, reason) if all hold, otherwise call
+        set_waza_grade_fail(description, reason).

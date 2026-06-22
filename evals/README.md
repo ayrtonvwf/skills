@@ -73,30 +73,31 @@ read-only tools the skill is allowed to call (`get_merge_request`,
 mutating tool is registered, so any attempt to post/approve/merge fails loudly — this backs
 the read-only guardrail test.
 
-Scenario selection has **two modes**:
+Scenario selection has a **single mode — registry routing**. The server loads every file in
+`fixtures/` and routes each tool call to a scenario by the **MR identifier in the request**
+(`merge_request_iid`, falling back to `project_id`). Each eval task selects its scenario
+simply through the MR URL in its prompt:
 
-1. **Registry mode (what the eval uses).** With no `FIXTURE` env var, the server loads every
-   file in `fixtures/` and routes each tool call to a scenario by the **MR identifier in the
-   request** (`merge_request_iid`, falling back to `project_id`). Each eval task selects its
-   scenario simply through the MR URL in its prompt:
+| Fixture | MR URL in the task prompt |
+| ------- | ------------------------- |
+| `ready-mr` | `…/acme/web-app/-/merge_requests/42` |
+| `not-ready-mr` | `…/acme/checkout-service/-/merge_requests/57` |
+| `proof-tests-only-mr` | `…/acme/api-service/-/merge_requests/70` |
+| `docs-no-jira-mr` | `…/acme/docs-site/-/merge_requests/88` |
+| `draft-mr` | `…/acme/offline-sync/-/merge_requests/73` |
 
-   | Fixture | MR URL in the task prompt |
-   | ------- | ------------------------- |
-   | `ready-mr` | `…/acme/web-app/-/merge_requests/42` |
-   | `not-ready-mr` | `…/acme/checkout-service/-/merge_requests/57` |
-   | `draft-mr` | `…/acme/offline-sync/-/merge_requests/73` |
+The standalone smoke test drives the server the same way — passing an iid/project per call,
+no env var needed:
 
-2. **Pinned mode (back-compat).** Setting `FIXTURE=<name>` pins one scenario for every call.
-   The standalone smoke test uses this:
+```bash
+node evals/mr-feedback/mock-gitlab-mcp/smoke-test.mjs   # MCP-level checks, no Waza
+```
 
-   ```bash
-   node evals/mr-feedback/mock-gitlab-mcp/smoke-test.mjs   # MCP-level checks, no Waza
-   ```
-
-Registry mode exists because **per-task environment variables cannot reach the MCP
-subprocess** under `copilot-sdk` (confirmed by a smoke run): `mcp_servers` is configured once
-at the eval level and a task's `inputs.environment` is not propagated to it. Routing by the
-MR identifier keeps a single `gitlab-mcp` server serving all tasks deterministically. See
+Registry routing is the only mechanism because **per-task environment variables cannot reach
+the MCP subprocess** under `copilot-sdk` (confirmed by a smoke run): `mcp_servers` is
+configured once at the eval level and a task's `inputs.environment` is not propagated to it.
+Routing by the MR identifier keeps a single `gitlab-mcp` server serving all tasks
+deterministically. See
 [`specs/waza-eval/specification.md`](../specs/waza-eval/specification.md) §8 for the full
 write-up.
 

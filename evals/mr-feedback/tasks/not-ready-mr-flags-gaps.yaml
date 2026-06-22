@@ -30,6 +30,8 @@ graders:
             - "(?i)jira"
             - "(?i)testing instruction"
             - "(?i)proof.?of.?run"
+            # Each gap explains why it matters to the author, not just what to fix.
+            - "(?i)why it matters"
           must_not_match: []
   - type: prompt
     name: gaps-framed-encouragingly
@@ -53,5 +55,9 @@ graders:
           or "Not ready" (not "Ready"/"Almost ready").
         - It names the missing required items (Jira link, testing instructions,
           proof-of-run) as gaps to close.
+        - Each gap it raises includes a "why it matters" that is tailored to that
+          specific gap (explaining the purpose of closing it), rather than only stating
+          what to fix. The reasons should fit the actual problems found, not read as a
+          generic boilerplate paragraph pasted onto every item.
         Call set_waza_grade_pass(description, reason) if all hold, otherwise call
         set_waza_grade_fail(description, reason).

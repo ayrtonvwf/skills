@@ -1,0 +1,38 @@
+{
+  "get_merge_request": {
+    "iid": 70,
+    "project_id": "acme/api-service",
+    "title": "Add retry with backoff to the webhook dispatcher",
+    "description": "## What & why\n\nThe webhook dispatcher dropped events when the downstream returned 5xx. This adds an\nexponential-backoff retry (3 attempts) so transient downstream failures no longer lose events.\n\nJira: https://acme.atlassian.net/browse/API-921\n\n## How to test\n\n1. `npm install`\n2. Point `WEBHOOK_URL` at a server that returns 503 twice then 200.\n3. Enqueue an event and confirm it is delivered after the retries.\n\n## Proof it was run\n\nAll tests pass:\n\n```\nPASS  src/webhooks/dispatcher.test.ts (8 tests)\n  ✓ retries on 5xx with backoff\n  ✓ gives up after 3 attempts\nTest Suites: 1 passed, Tests: 8 passed\n```\n\n## Notes for reviewer\n\nStart in `src/webhooks/dispatcher.ts`. No breaking changes.",
+    "author": { "username": "msmith", "name": "Morgan Smith" },
+    "state": "opened",
+    "source_branch": "feature/webhook-retry",
+    "target_branch": "main",
+    "work_in_progress": false,
+    "draft": false,
+    "labels": ["backend"],
+    "milestone": null,
+    "commits_count": 2,
+    "commit_summary": "2 commits: add backoff retry, add dispatcher tests",
+    "approvals": { "approvals_required": 1, "approvals_left": 1, "approved_by": [] },
+    "merge_status": "can_be_merged",
+    "detailed_merge_status": "mergeable",
+    "has_conflicts": false,
+    "diverged_commits_count": 0
+  },
+  "list_merge_request_changed_files": [
+    { "path": "src/webhooks/dispatcher.ts", "additions": 46, "deletions": 8 },
+    { "path": "src/webhooks/dispatcher.test.ts", "additions": 72, "deletions": 0 }
+  ],
+  "get_merge_request_file_diff": {
+    "src/webhooks/dispatcher.ts": "@@ -20,8 +20,46 @@\n+  async function dispatchWithRetry(event, attempt = 0) {\n+    try {\n+      return await post(event);\n+    } catch (err) {\n+      if (attempt >= 2) throw err;\n+      await sleep(2 ** attempt * 100);\n+      return dispatchWithRetry(event, attempt + 1);\n+    }\n+  }\n",
+    "src/webhooks/dispatcher.test.ts": "@@ -0,0 +1,72 @@\n+import { dispatchWithRetry } from \"./dispatcher\";\n+test(\"retries on 5xx with backoff\", async () => {\n+  // ...\n+});\n"
+  },
+  "list_merge_request_discussions": [],
+  "list_merge_request_pipelines": [
+    { "id": 9300, "status": "success", "ref": "feature/webhook-retry", "sha": "c0ffee01" }
+  ],
+  "list_pipelines": [
+    { "id": 9300, "status": "success", "ref": "feature/webhook-retry", "sha": "c0ffee01" }
+  ]
+}

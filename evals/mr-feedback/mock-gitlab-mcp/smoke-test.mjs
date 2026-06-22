@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 // Standalone MCP smoke test for the mock GitLab MCP server — does NOT use Waza.
 // Spawns server.mjs over stdio, lists tools, makes a sample call, and checks that
-// missing-required-param / unknown-tool / unknown-FIXTURE all fail loudly.
+// missing-required-param / unknown-tool / unknown-MR-identifier all fail loudly.
+// The server has a single mode (registry): each call routes to a scenario by the
+// MR iid/project in its arguments, exactly as the Waza eval drives it.
 
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import { spawnSync } from "node:child_process";
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -29,11 +30,11 @@ const bad = (m) => {
   console.log(`  FAIL  ${m}`);
 };
 
-async function connect(fixture) {
+async function connect() {
   const transport = new StdioClientTransport({
     command: "node",
     args: [SERVER],
-    env: { ...process.env, FIXTURE: fixture },
+    env: { ...process.env },
   });
   const client = new Client({ name: "smoke-test", version: "1.0.0" });
   await client.connect(transport);
@@ -42,7 +43,7 @@ async function connect(fixture) {
 
 async function main() {
   console.log("== 1. lists exactly the six tools ==");
-  const { client, transport } = await connect("ready-mr");
+  const { client, transport } = await connect();
   const { tools } = await client.listTools();
   const names = tools.map((t) => t.name).sort();
   const expected = [...EXPECTED_TOOLS].sort();
@@ -115,19 +116,19 @@ async function main() {
     else bad(`unregistered mutating tool should have errored: ${r.msg}`);
   }
 
-  await transport.close();
-
-  console.log("== 6. unknown FIXTURE fails loudly at startup ==");
-  const proc = spawnSync("node", [SERVER], {
-    env: { ...process.env, FIXTURE: "does-not-exist" },
-    encoding: "utf8",
-    timeout: 5000,
-  });
-  if (proc.status !== 0 && /Could not load fixture/.test(proc.stderr)) {
-    ok(`exited ${proc.status} with: ${proc.stderr.trim().split("\n")[0]}`);
-  } else {
-    bad(`expected non-zero exit + error, got status=${proc.status}, stderr=${proc.stderr}`);
+  console.log("== 6. unknown MR identifier fails loudly ==");
+  {
+    const r = await failedLoudly(() =>
+      client.callTool({
+        name: "get_merge_request",
+        arguments: { project_id: "acme%2Fdoes-not-exist", merge_request_iid: 99999 },
+      }),
+    );
+    if (r.failed) ok(`rejected unknown MR: ${r.msg.split("\n")[0]}`);
+    else bad(`call for an unregistered MR should have errored: ${r.msg}`);
   }
+
+  await transport.close();
 
   console.log("");
   if (failures === 0) {

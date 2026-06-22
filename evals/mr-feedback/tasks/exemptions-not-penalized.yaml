@@ -1,0 +1,55 @@
+id: exemptions-not-penalized
+name: exemptions-not-penalized
+description: A docs-only MR that explicitly states it has no Jira card must not be penalized for the missing Jira link or for missing tests (test coverage is not applicable to non-implementation changes).
+inputs:
+  prompt: |
+    Please give me MR feedback on this GitLab merge request:
+    https://gitlab.com/acme/docs-site/-/merge_requests/88
+
+    Write the report to `report.md` in the current working directory.
+graders:
+  - type: skill_invocation
+    name: mr-feedback-ran
+    config:
+      required_skills: ["mr-feedback"]
+      mode: any_order
+      allow_extra: true
+  - type: file
+    name: report-scores-high
+    config:
+      must_exist: ["report.md"]
+      must_not_exist: []
+      content_patterns:
+        - path: "report.md"
+          must_match:
+            # A well-prepared MR with legitimately-N/A items lands in a high label.
+            - "\\*\\*Overall: \\d+/10 - (Ready|Almost ready)\\*\\*"
+          must_not_match:
+            # Neither the Jira link nor missing tests may surface as required-item flags.
+            - "\\*\\*\\[important\\]\\*\\*"
+  - type: prompt
+    name: exemptions-respected
+    config:
+      model: claude-haiku-4.5
+      # continue_session reuses the executor workspace where report.md was written
+      # (without it the judge starts blank and resolves to a false 0 — the blind-judge bug).
+      continue_session: true
+      prompt: |
+        In this session you just produced an MR review-readiness report and wrote it to
+        `report.md` in the current working directory. Read that `report.md` and grade it.
+
+        The merge request it reviewed is a DOCUMENTATION-ONLY change (no application code).
+        Its description explicitly states there is no Jira card because it is an ad-hoc
+        docs follow-up that was never ticketed. It includes testing instructions and a
+        screenshot of the rendered docs page as proof-of-run.
+
+        PASS only if ALL of the following hold:
+        - It does NOT flag the missing Jira link as a gap — the description explains the
+          absence, so the item is satisfied / not applicable, not a problem.
+        - It does NOT flag missing tests / test coverage as a gap — test coverage is not
+          applicable to a documentation-only change, and must not lower the score.
+        - The overall label is high ("Ready" or "Almost ready"), not "Needs prep" or
+          "Not ready".
+        - The tone is collaborative and encouraging.
+        Call set_waza_grade_pass(description, reason) if all hold, otherwise call
+        set_waza_grade_fail(description, reason).

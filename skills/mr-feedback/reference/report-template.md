@@ -19,11 +19,13 @@
 
 ## To raise readiness
 
-For each gap, state the fix and *why it matters* (draw the reason from the
-corresponding rubric category's **Reason**).
+For each gap, state the fix and *why it matters*. Tailor the reason to the **exact**
+problem found - start from the rubric category's **Reason** as background, but rewrite
+it to address only what is actually wrong here. Never mention parts of the category
+that are fine (e.g. don't bring up the pipeline if it passed).
 
-- **[important]** [gap that meaningfully slows a reviewer down] — *Why it matters:* [reason from the rubric category]
-- **[nice-to-have]** [smaller improvement] — *Why it matters:* [reason from the rubric category]
+- **[important]** [gap that meaningfully slows a reviewer down] — *Why it matters:* [reason tailored to this specific gap]
+- **[nice-to-have]** [smaller improvement] — *Why it matters:* [reason tailored to this specific gap]
 
 ## Suggested next steps
 

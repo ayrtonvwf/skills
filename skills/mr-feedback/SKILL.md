@@ -77,8 +77,16 @@ pipeline), mark it "not available" rather than guessing.
 
 Each rubric category carries a **Reason** explaining why it matters to the author.
 When you report a gap in "To raise readiness", always include *why it matters* for
-the author, drawn from that category's Reason - so the feedback explains the purpose
-behind each request, not just the request itself.
+the author - so the feedback explains the purpose behind each request, not just the
+request itself.
+
+**Do not copy the category Reason verbatim.** The Reason is background that covers the
+whole category; rewrite it to fit the *exact* problem you found. Reference only the
+specific thing that is wrong, and never mention aspects of the category that are fine.
+For example, if the branch is behind master but the pipeline is green, explain why
+being behind master matters - do **not** mention the pipeline at all, since it passed.
+The "why it matters" must be true for this MR's specific gap, not a generic statement
+about the category.
 
 ## Output
 

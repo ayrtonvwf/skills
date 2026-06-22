@@ -1,0 +1,36 @@
+{
+  "get_merge_request": {
+    "iid": 88,
+    "project_id": "acme/docs-site",
+    "title": "Document the new CSV export feature in the analyst guide",
+    "description": "## What & why\n\nAdds a section to the analyst guide explaining how to use the new \"Download CSV\"\nbutton, with a screenshot and a note about the row-limit. Pure documentation change.\n\nNo Jira card — this is an ad-hoc docs follow-up to a feature that already shipped, it\nwas never ticketed.\n\n## How to test\n\n1. `npm run docs:dev`\n2. Open `/guides/analyst#csv-export` and confirm the new section renders with the screenshot.\n\n## Proof it was run\n\nScreenshot of the rendered guide page with the new section:\n\n![rendered analyst guide](https://acme.gitlab.io/uploads/analyst-guide-csv.png)\n\n## Notes for reviewer\n\nProse + one screenshot asset only; no application code touched.",
+    "author": { "username": "lwriter", "name": "Lee Writer" },
+    "state": "opened",
+    "source_branch": "docs/analyst-csv-export",
+    "target_branch": "main",
+    "work_in_progress": false,
+    "draft": false,
+    "labels": ["documentation"],
+    "milestone": null,
+    "commits_count": 1,
+    "commit_summary": "1 commit: add CSV export section to analyst guide",
+    "approvals": { "approvals_required": 1, "approvals_left": 1, "approved_by": [] },
+    "merge_status": "can_be_merged",
+    "detailed_merge_status": "mergeable",
+    "has_conflicts": false,
+    "diverged_commits_count": 0
+  },
+  "list_merge_request_changed_files": [
+    { "path": "docs/guides/analyst.md", "additions": 38, "deletions": 1 }
+  ],
+  "get_merge_request_file_diff": {
+    "docs/guides/analyst.md": "@@ -120,6 +120,43 @@\n+## Exporting to CSV\n+\n+Click the **Download CSV** button on the reports dashboard to export the current\n+filtered view. The export respects the active date filter.\n+\n+![CSV export button](../assets/csv-export.png)\n"
+  },
+  "list_merge_request_discussions": [],
+  "list_merge_request_pipelines": [
+    { "id": 9400, "status": "success", "ref": "docs/analyst-csv-export", "sha": "d0cf11e5" }
+  ],
+  "list_pipelines": [
+    { "id": 9400, "status": "success", "ref": "docs/analyst-csv-export", "sha": "d0cf11e5" }
+  ]
+}
