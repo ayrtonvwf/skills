@@ -105,9 +105,9 @@ Registry routing is the only mechanism because **per-task environment variables 
 the MCP subprocess** under `copilot-sdk` (confirmed by a smoke run): `mcp_servers` is
 configured once at the eval level and a task's `inputs.environment` is not propagated to it.
 Routing by the MR identifier keeps a single `gitlab-mcp` server serving all tasks
-deterministically. See
-[`specs/waza-eval/specification.md`](../specs/waza-eval/specification.md) §8 for the full
-write-up.
+deterministically. See the archived OpenSpec change
+[`add-waza-eval/design.md`](../openspec/changes/archive/2026-06-21-add-waza-eval/design.md)
+for the full write-up.
 
 ## Gotchas worth knowing
 

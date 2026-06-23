@@ -2,7 +2,10 @@
   // Files/globs to skip
   "ignores": [
     "node_modules",
-    "**/node_modules"
+    "**/node_modules",
+    // OpenSpec-generated instruction files (managed by `openspec update`)
+    ".claude/skills/openspec-*/**",
+    ".claude/commands/opsx/**"
   ],
   // Rule configuration (https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md)
   "config": {

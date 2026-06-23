@@ -41,6 +41,22 @@ by reading them.
     is `scripts/`. When a file is genuinely read by the model (e.g. a markdown rubric
     or preferences file), prefer `reference/` even if it feels asset-like.
 
+## Specs and changes (OpenSpec)
+
+This repo uses [OpenSpec](https://github.com/Fission-AI/OpenSpec) for spec-driven
+development. Specs and proposals live under `openspec/`:
+
+- `openspec/specs/<capability>/spec.md` - the **living** specs (current truth) for each
+  capability, written as `### Requirement:` blocks (SHALL/MUST) with `#### Scenario:`
+  WHEN/THEN cases. Today: `mr-feedback` (the skill) and `mr-feedback-eval` (its eval suite).
+- `openspec/changes/<id>/` - an in-flight change: `proposal.md`, `design.md`, `tasks.md`,
+  and spec deltas under `specs/` (`## ADDED/MODIFIED/REMOVED Requirements`).
+- `openspec/changes/archive/<date>-<id>/` - completed changes, kept as history.
+
+Workflow: propose a change before non-trivial work (`/opsx:propose`), implement against
+`tasks.md`, then archive it (`/opsx:archive`) so its deltas fold into the living specs.
+Validate with `openspec validate --all --strict`. Do not edit archived changes.
+
 ## Conventions
 
 - **Keep `SKILL.md` lean.** It is the always-loaded entry point. Push detail into

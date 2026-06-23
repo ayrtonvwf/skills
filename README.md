@@ -33,9 +33,9 @@ write-ups:
 - **A real constraint solved by design, and documented.** Per-task environment variables
   cannot reach the MCP subprocess under `copilot-sdk`, so scenario selection is done by
   **registry routing**: the server loads every fixture and routes each call by the MR
-  identifier in the request. The reasoning is captured in
-  [`specs/waza-eval/specification.md`](specs/waza-eval/specification.md) (§8) and the
-  [eval README](evals/README.md#how-the-mock-gitlab-mcp-server-works).
+  identifier in the request. The reasoning is captured in the archived OpenSpec change
+  [`add-waza-eval/design.md`](openspec/changes/archive/2026-06-21-add-waza-eval/design.md)
+  and the [eval README](evals/README.md#how-the-mock-gitlab-mcp-server-works).
 - **Progressive disclosure as an architecture.** `SKILL.md` stays a lean, always-loaded
   entry point; rubrics, preferences, and templates live in `reference/` and are read only when
   needed. The split is deliberate and documented ([reference vs assets](#reference-vs-assets)).
@@ -47,7 +47,7 @@ write-ups:
   are on.
 
 For the design decisions and gotchas in full, start with [`evals/README.md`](evals/README.md)
-and the specs under [`specs/`](specs/).
+and the [OpenSpec specs and changes](openspec/) under [`openspec/`](openspec/).
 
 ## Available skills
 
@@ -66,7 +66,7 @@ skills/
 │       ├── assets/         # files the task consumes or outputs
 │       └── scripts/        # optional executable helpers the skill runs
 ├── evals/                  # Waza eval suites + mock MCP servers per skill
-├── specs/                  # design specs and decision records
+├── openspec/               # OpenSpec: living specs/ + change proposals (changes/)
 └── scripts/                # repo tooling (eval cwd sync, etc.)
 ```
 
