@@ -16,11 +16,11 @@ checked repeatably without touching live services.
 - **Waza CLI ≥ 0.34** on `PATH`. Check with `waza --version`.
   Install/upgrade: `curl -fsSL https://raw.githubusercontent.com/microsoft/waza/main/install.sh | bash`.
   > **Do not use 0.33.0.** Its tool-permission handshake is incompatible with current
-  > Copilot CLI builds — every agent tool call fails with *"unexpected user permission
+  > Copilot CLI builds - every agent tool call fails with *"unexpected user permission
   > response"*. The fix landed in 0.34.0 ("Tool permission handling now uses the SDK
   > approval kind"). This suite is verified on **0.37.0**.
 - **`copilot-sdk` auth.** The executor makes real model calls via GitHub Copilot. There is
-  no `waza login`; verify with `waza models` — if it lists models, auth is wired.
+  no `waza login`; verify with `waza models` - if it lists models, auth is wired.
 - **Node.js** for the mock MCP server. Install its deps once, then point the suite at this
   clone's copy of the server (see the `cwd` gotcha below):
 
@@ -30,13 +30,16 @@ checked repeatably without touching live services.
   ```
 
   `sync-eval-cwd` (the repo-root [`scripts/sync-eval-cwd.mjs`](../scripts/sync-eval-cwd.mjs))
-  scans every `evals/*/eval.yaml` and rewrites the one machine-specific line in each (the MCP
-  server's absolute `cwd`) to this checkout's path. It is idempotent - a no-op if already
-  correct - and is the setup step that makes the suites portable across machines and CI. It
-  also runs automatically via the repo-root `postinstall` hook, so a plain `npm install` keeps
-  the suites pointed at the local checkout. New suites are covered automatically as long as
-  they keep their mock server under `evals/<suite>/` and reference it by a relative basename in
-  `eval.yaml`.
+  **renders** each suite's running config: it reads the committed `evals/<suite>/eval.template.yaml`
+  (source of truth, with a *relative* `cwd:`) and writes a sibling `eval.yaml` with the `cwd:`
+  resolved to an absolute path for this checkout. That generated `eval.yaml` is **gitignored** -
+  the machine-specific path never enters git. It is idempotent (a no-op if already current) and
+  runs automatically via the repo-root `postinstall` hook, so a plain `npm install` keeps the
+  suites pointed at the local checkout. New suites are covered automatically as long as they ship
+  an `eval.template.yaml` with a relative `cwd:`.
+
+  > **Edit `eval.template.yaml`, never `eval.yaml`.** The latter is a generated artifact;
+  > changes to it are lost on the next render (and it is untracked anyway).
 
 ## Running
 
@@ -55,7 +58,7 @@ waza run evals/mr-feedback/eval.yaml \
 `not-ready-mr-flags-gaps`; the other tasks use structural graders only.
 
 **Judge the suite by pass rate, not the aggregate `avg` score.** waza reports both
-`pass_rate` and `avg`; pin success on `pass_rate` — every grader passing across all tasks —
+`pass_rate` and `avg`; pin success on `pass_rate` - every grader passing across all tasks -
 and treat `avg`/`min_score`/`stddev` as diagnostics only. The aggregate is deliberately not
 the gate because a passing `negative`-mode `trigger` grader still reports a low raw number
 that drags `avg` down without meaning anything went wrong (see Gotchas). The
@@ -75,10 +78,10 @@ follows the rubric under a weaker or different model is an open question. A mult
 read-only tools the skill is allowed to call (`get_merge_request`,
 `list_merge_request_changed_files`, `get_merge_request_file_diff`,
 `list_merge_request_discussions`, `list_merge_request_pipelines`, `list_pipelines`). No
-mutating tool is registered, so any attempt to post/approve/merge fails loudly — this backs
+mutating tool is registered, so any attempt to post/approve/merge fails loudly - this backs
 the read-only guardrail test.
 
-Scenario selection has a **single mode — registry routing**. The server loads every file in
+Scenario selection has a **single mode - registry routing**. The server loads every file in
 `fixtures/` and routes each tool call to a scenario by the **MR identifier in the request**
 (`merge_request_iid`, falling back to `project_id`). Each eval task selects its scenario
 simply through the MR URL in its prompt:
@@ -91,7 +94,7 @@ simply through the MR URL in its prompt:
 | `docs-no-jira-mr` | `…/acme/docs-site/-/merge_requests/88` |
 | `draft-mr` | `…/acme/offline-sync/-/merge_requests/73` |
 
-The standalone smoke test drives the server the same way — passing an iid/project per call,
+The standalone smoke test drives the server the same way - passing an iid/project per call,
 no env var needed:
 
 ```bash
@@ -109,34 +112,35 @@ write-up.
 ## Gotchas worth knowing
 
 - **`mcp_servers` entry needs `tools: ["*"]`.** Omitting it (or `[]`) registers the server
-  but disables every tool — calls then return a null result. (`["*"]` = all, `[]` = none.)
+  but disables every tool - calls then return a null result. (`["*"]` = all, `[]` = none.)
 - **MCP server paths must be absolute.** Waza passes `mcp_servers` config to the SDK verbatim
   with no env expansion, and the server is spawned with the agent's temp workspace as its cwd.
-  `eval.yaml` therefore sets an absolute `cwd` to `mock-gitlab-mcp/` - the one machine-specific
-  line. Do not hand-edit it: run `npm run sync-eval-cwd` (from the repo root) to rewrite it to
-  your checkout's path (idempotent; safe in CI before `waza run`, and also wired into
-  `postinstall`).
+  The running `eval.yaml` therefore needs an absolute `cwd` to `mock-gitlab-mcp/` - the one
+  machine-specific line. That is why `eval.yaml` is generated, not committed: edit the relative
+  `cwd` in `eval.template.yaml` and run `npm run sync-eval-cwd` (from the repo root) to render
+  `eval.yaml` with the absolute path for your checkout (idempotent; safe in CI before `waza
+  run`, and also wired into `postinstall`).
 - **Exposed MCP tool names are namespaced** as `gitlab-mcp-<tool>`. The `tool_constraint`
   grader matches tool names by case-insensitive regex, so its patterns match the bare tool
   substring regardless of the prefix.
 - **A `prompt` grader at `score: 0, passed: false` with feedback `"All prompts passed"`
-  means the judge never graded — it is not a real pass.** That feedback string is the
+  means the judge never graded - it is not a real pass.** That feedback string is the
   signature of a judge that returned no `set_waza_grade_pass`/`set_waza_grade_fail` verdict
   (e.g. it had no report to read). Per waza's scoring (`score = passes / (passes + failures)`,
   so `0/0 → 0`), an ungraded prompt grader always resolves to score 0. If you see a 0-score
-  "passed" prompt grader, suspect a blind judge, not a flaky model — confirm the grader sets
+  "passed" prompt grader, suspect a blind judge, not a flaky model - confirm the grader sets
   `continue_session: true` (or otherwise feeds the report to the judge) so it actually reads
   the artifact it is grading.
 - **A passing `negative` trigger grader reports raw probability, not a pass score.** The
   `does-not-trigger` grader in `anti-trigger-non-mr` (mode `negative`, threshold 0.60)
   **passes** when the trigger probability is below the threshold, but it contributes that raw
-  probability (e.g. 0.125) to the task's aggregate — pulling the task `avg` down (~0.78) and
+  probability (e.g. 0.125) to the task's aggregate - pulling the task `avg` down (~0.78) and
   inflating suite `stddev`/lowering `min_score`. The classification is correct; the number is
   misleading. Interpret this grader as pass/fail, not by its averaged score (this is why suite
-  success is pinned on `pass_rate`, not `avg` — see Running).
+  success is pinned on `pass_rate`, not `avg` - see Running).
 - **Report content is asserted via `file.content_patterns`, not `text`.** Each MR task pins
   the output to `report.md` (the skill lets an explicit request override its default path) so
-  the `file` grader — which has no glob — can target a known path. The stable content anchors
+  the `file` grader - which has no glob - can target a known path. The stable content anchors
   are the `**Overall: N/10 - <Label>**` line, the `## …` section headers, and the
   `**[important]**` / `**[nice-to-have]**` flag markers. The H1 title line is **not** asserted
   (the agent varies it).

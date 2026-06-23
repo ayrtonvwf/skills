@@ -12,11 +12,12 @@ config:
     gitlab-mcp:               # name the skill's preferences expect
       command: node
       args: ["server.mjs"]
-      # Absolute path REQUIRED (Waza passes this verbatim, no env expansion, and spawns the
-      # server in the agent's temp workspace). It is therefore machine-specific. On any other
-      # clone or in CI, regenerate this line:
-      #   npm run sync-eval-cwd   (also runs automatically on `npm install`)
-      cwd: /Users/weback/projects/ayrton/skills/evals/mr-feedback/mock-gitlab-mcp
+      # SOURCE OF TRUTH. This relative cwd is resolved to an absolute path at generation
+      # time (Waza passes cwd verbatim - no env expansion - and spawns the server in the
+      # agent's temp workspace, so the running eval.yaml needs an absolute path). Keep this
+      # relative so no machine-specific path is committed; `npm run sync-eval-cwd` renders
+      # eval.yaml (gitignored) with the absolute path for the local checkout.
+      cwd: ./mock-gitlab-mcp
       tools: ["*"]            # REQUIRED: omitted/[] disables all tools (copilot SDK semantics)
       # No FIXTURE env: the server runs in registry mode and routes each call to
       # a scenario by the MR iid/project in the request. Each task selects its
