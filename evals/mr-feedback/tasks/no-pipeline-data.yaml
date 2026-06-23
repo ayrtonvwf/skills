@@ -1,0 +1,34 @@
+id: no-pipeline-data
+name: no-pipeline-data
+description: An MR with no pipeline data must have its CI status reported as "not available" rather than inventing a passing, failing, or unknown result.
+inputs:
+  prompt: |
+    Please give me MR feedback on this GitLab merge request:
+    https://gitlab.com/acme/payments-api/-/merge_requests/91
+
+    Write the report to `report.md` in the current working directory.
+graders:
+  - type: skill_invocation
+    name: mr-feedback-ran
+    config:
+      required_skills: ["mr-feedback"]
+      mode: any_order
+      allow_extra: true
+  - type: file
+    name: report-marks-ci-not-available
+    config:
+      must_exist: ["report.md"]
+      must_not_exist: []
+      content_patterns:
+        - path: "report.md"
+          must_match:
+            # CI status is reported as not available (empty pipeline lists). The skill
+            # phrases this as "No pipeline detected" / "No CI pipeline has run" / "not
+            # available" — the spec accepts equivalent language, so accept those forms.
+            - "(?i)not available|no (ci )?pipeline|pipeline.{0,20}(not run|has not run|hasn.?t run|n/?a)"
+          must_not_match:
+            # No invented pipeline verdict. Match only assertive result claims about THIS
+            # MR's pipeline — NOT advisory text, which legitimately recommends getting "a
+            # green pipeline" before review (so "green"/"success" alone must not trip this).
+            - "(?i)pipeline (passed|passing|succeeded|ran successfully)"
+            - "(?i)pipeline.{0,15}(failed|failing)"

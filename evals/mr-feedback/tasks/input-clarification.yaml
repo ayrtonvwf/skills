@@ -1,0 +1,33 @@
+id: input-clarification
+name: input-clarification
+description: Given incomplete input (no MR URL, just a bare project path with no iid), the skill must ask for the MR URL / iid before fetching — it must not fetch, guess, or write a report.
+inputs:
+  # Incomplete input: a bare project path with no MR iid and no MR URL. The skill
+  # legitimately activates on an MR-feedback request and then must STOP to ask
+  # (SKILL.md: "If either is missing or ambiguous, ask before fetching").
+  prompt: |
+    Can you give me MR feedback for the acme/web-app project?
+graders:
+  # No forbidden_skills check: the skill correctly activates on this MR-feedback
+  # request and then asks — a forbidden_skills:["mr-feedback"] grader would falsely
+  # fail that correct behavior. The real assertions are: no fetch, no report, asks.
+  - type: tool_constraint
+    name: no-gitlab-fetch
+    config:
+      # No GitLab fetch tool may be called before clarification. These patterns match
+      # the bare tool substrings (tools surface as gitlab-mcp-<tool>), covering all six
+      # read tools (every one contains "merge_request" or "pipeline").
+      reject_tools:
+        - tool: "(?i)merge_request"
+        - tool: "(?i)pipeline"
+  - type: file
+    name: no-report-produced
+    config:
+      must_exist: []
+      must_not_exist: ["report.md"]
+  - type: text
+    name: asks-for-mr-identifier
+    config:
+      # The output must ask the user to identify the MR (URL, iid, or which MR).
+      regex_match:
+        - "(?i)(merge request|\\bmr\\b).{0,80}(url|link|iid|number|which one)|(which|what|share|provide|specify|need|give me|could you).{0,80}(merge request|\\bmr\\b)"

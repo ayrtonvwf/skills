@@ -1,0 +1,54 @@
+{
+  "get_merge_request": {
+    "iid": 95,
+    "project_id": "acme/catalog-service",
+    "title": "Add faceted search to the catalog API",
+    "description": "## What & why\n\nAdds faceted filtering (brand, price range, availability) to `GET /catalog/search` so\nthe storefront can render filter sidebars without client-side filtering. Resolves the\nslow-search complaints on large categories.\n\nJira: https://acme.atlassian.net/browse/CAT-512\n\n## How to test\n\n1. `npm install && npm run dev`\n2. `GET /catalog/search?q=shoes&brand=acme&price=20-50`\n3. Confirm the facets in the response match the applied filters.\n4. Run `npm test -- catalog-search` to exercise the unit tests.\n\n## Proof it was run\n\nResponse capture of a faceted query plus the passing test run:\n\n```\nGET /catalog/search?q=shoes&brand=acme -> 200, 18 results, 3 facets\nPASS  src/catalog/search.test.ts (14 tests)\nTest Suites: 1 passed, Tests: 14 passed\n```\n\n![faceted search response](https://acme.gitlab.io/uploads/facet-search.png)\n\n## Notes for reviewer\n\nStart in `src/catalog/search.ts` (facet aggregation); the route wiring in\n`search.controller.ts` is thin. No breaking changes, no migrations.",
+    "author": { "username": "lwong", "name": "Lily Wong" },
+    "state": "opened",
+    "source_branch": "feature/faceted-search",
+    "target_branch": "main",
+    "work_in_progress": false,
+    "draft": false,
+    "labels": ["feature", "catalog"],
+    "milestone": { "title": "Q2 Search" },
+    "commits_count": 4,
+    "commit_summary": "4 commits: add facet aggregation, wire route, add tests, tidy",
+    "approvals": { "approvals_required": 1, "approvals_left": 1, "approved_by": [] },
+    "merge_status": "can_be_merged",
+    "detailed_merge_status": "mergeable",
+    "has_conflicts": false,
+    "diverged_commits_count": 0
+  },
+  "list_merge_request_changed_files": [
+    { "path": "src/catalog/search.ts", "additions": 96, "deletions": 4 },
+    { "path": "src/catalog/search.controller.ts", "additions": 14, "deletions": 2 },
+    { "path": "src/catalog/search.test.ts", "additions": 120, "deletions": 0 }
+  ],
+  "get_merge_request_file_diff": {
+    "src/catalog/search.ts": "@@ -12,4 +12,108 @@\n+  export function buildFacets(results: Product[]): Facets {\n+    // TODO: cache facet counts before merge\n+    console.log(\"building facets for\", results.length, \"results\");\n+    const brands = countBy(results, (r) => r.brand);\n+    // TODO: support nested price buckets\n+    return { brands, price: priceBuckets(results) };\n+  }\n",
+    "src/catalog/search.controller.ts": "@@ -8,2 +8,14 @@\n+  const facets = buildFacets(results);\n+  console.log(\"search facets\", facets);\n+  return res.json({ results, facets });\n",
+    "src/catalog/search.test.ts": "@@ -0,0 +1,120 @@\n+import { buildFacets } from \"./search\";\n+test(\"aggregates brand facets\", () => {\n+  expect(buildFacets(sample).brands).toHaveProperty(\"acme\");\n+});\n"
+  },
+  "list_merge_request_discussions": [
+    {
+      "id": "d1",
+      "notes": [
+        {
+          "id": 5201,
+          "author": { "username": "areviewer" },
+          "body": "Nice — the response capture and screenshot make this easy to verify.",
+          "system": false,
+          "resolvable": true,
+          "resolved": true
+        }
+      ]
+    }
+  ],
+  "list_merge_request_pipelines": [
+    { "id": 9500, "status": "success", "ref": "feature/faceted-search", "sha": "facecafe" }
+  ],
+  "list_pipelines": [
+    { "id": 9500, "status": "success", "ref": "feature/faceted-search", "sha": "facecafe" }
+  ]
+}

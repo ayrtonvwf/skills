@@ -1,0 +1,35 @@
+id: default-output-path
+name: default-output-path
+description: With no output-path override in the prompt, the skill must write to its templated default path (slug + iid + date + timestamp), not to report.md.
+inputs:
+  # NOTE: unlike every other task, this prompt intentionally OMITS the
+  # "write the report to report.md" override, so the skill falls back to its
+  # templated default path (see skills/mr-feedback/reference/preferences.md).
+  prompt: |
+    Please give me MR feedback on this GitLab merge request:
+    https://gitlab.com/acme/web-app/-/merge_requests/42
+graders:
+  - type: skill_invocation
+    name: mr-feedback-ran
+    config:
+      required_skills: ["mr-feedback"]
+      mode: any_order
+      allow_extra: true
+  - type: file
+    name: override-path-not-used
+    config:
+      # The file grader has no glob and the template's trailing <TIMESTAMP> (Unix
+      # seconds) is non-deterministic, so no fixed default path can be asserted with
+      # must_exist. Instead prove the override path was NOT used — the skill must have
+      # fallen back to its templated default. The announced-path assertion below
+      # confirms the default's deterministic portion.
+      must_exist: []
+      must_not_exist: ["report.md"]
+  - type: text
+    name: announced-path-matches-template
+    config:
+      # The skill announces the path it wrote (SKILL.md step 8). The deterministic
+      # portion of the template is slug + iid + date: project acme/web-app → slug
+      # "web-app", iid 42, today's date. The trailing <TIMESTAMP> is not asserted.
+      regex_match:
+        - "mr-feedback/web-app-mr-42-\\d{4}-\\d{2}-\\d{2}-"

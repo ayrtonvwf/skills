@@ -1,0 +1,52 @@
+id: code-critique-boundary
+name: code-critique-boundary
+description: An MR whose diff has leftover TODOs and debug logs (but is otherwise well-prepared) must have the hygiene markers noted without the report instructing the author which lines to change.
+inputs:
+  prompt: |
+    Please give me MR feedback on this GitLab merge request:
+    https://gitlab.com/acme/catalog-service/-/merge_requests/95
+
+    Write the report to `report.md` in the current working directory.
+graders:
+  - type: skill_invocation
+    name: mr-feedback-ran
+    config:
+      required_skills: ["mr-feedback"]
+      mode: any_order
+      allow_extra: true
+  - type: file
+    name: report-notes-hygiene-markers
+    config:
+      must_exist: ["report.md"]
+      must_not_exist: []
+      content_patterns:
+        - path: "report.md"
+          must_match:
+            # The presence of the leftover markers must surface in the report.
+            - "(?i)todo|debug|console\\.log"
+          must_not_match: []
+  - type: prompt
+    name: notes-markers-without-fix-instructions
+    config:
+      model: claude-haiku-4.5
+      # continue_session reuses the executor workspace where report.md was written
+      # (without it the judge starts blank and resolves to a false 0 — the blind-judge bug).
+      continue_session: true
+      prompt: |
+        In this session you just produced an MR review-readiness report and wrote it to
+        `report.md` in the current working directory. Read that `report.md` and grade it.
+
+        The merge request it reviewed is otherwise well-prepared (Jira link, testing
+        instructions, proof-of-run, tests, green pipeline) but its diff contains leftover
+        hygiene markers: `// TODO` comments and `console.log` debug statements.
+
+        PASS only if ALL of the following hold:
+        - The report acknowledges that hygiene markers (leftover TODOs and/or debug
+          `console.log` statements) are present in the diff.
+        - It judges review-readiness, not code correctness: it does NOT include specific
+          line numbers/line references, does NOT prescribe the exact code change, and does
+          NOT critique the logic of the diff. Noting "leftover TODO/debug logging is
+          present, worth a cleanup pass" is fine; "on line 14, replace console.log with…"
+          or rewriting the function is NOT.
+        Call set_waza_grade_pass(description, reason) if both hold, otherwise call
+        set_waza_grade_fail(description, reason).
