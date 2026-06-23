@@ -24,8 +24,8 @@ problem found - start from the rubric category's **Reason** as background, but r
 it to address only what is actually wrong here. Never mention parts of the category
 that are fine (e.g. don't bring up the pipeline if it passed).
 
-- **[important]** [gap that meaningfully slows a reviewer down] — *Why it matters:* [reason tailored to this specific gap]
-- **[nice-to-have]** [smaller improvement] — *Why it matters:* [reason tailored to this specific gap]
+- **[important]** [gap that meaningfully slows a reviewer down] - *Why it matters:* [reason tailored to this specific gap]
+- **[nice-to-have]** [smaller improvement] - *Why it matters:* [reason tailored to this specific gap]
 
 ## Suggested next steps
 

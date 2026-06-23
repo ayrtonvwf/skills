@@ -25,7 +25,7 @@ a good MR feel recognized and give a weaker one concrete, encouraging steps to r
 ## Preferences
 
 Before doing anything else, read `reference/preferences.md` (relative to this skill).
-It is the source of truth for all configurable behavior — output language, tone,
+It is the source of truth for all configurable behavior - output language, tone,
 fetch method, allowed tools, and output path. This SKILL.md does **not** restate
 those values; always read them from the preferences file.
 
@@ -53,7 +53,7 @@ If either is missing or ambiguous, ask before fetching.
 ## Workflow
 
 Use the method and tools declared in `reference/preferences.md`. The steps below say
-**what information to gather and why**, not which tool to call — pick the matching
+**what information to gather and why**, not which tool to call - pick the matching
 tool from the preferences for each.
 
 1. **MR metadata** - title, description, author, state, source/target branch, draft
