@@ -1,0 +1,40 @@
+{
+  "get_merge_request": {
+    "iid": 84,
+    "project_id": "acme/billing-service",
+    "title": "Prorate subscription upgrades mid-cycle",
+    "description": "## What & why\n\nWhen a customer upgrades mid-cycle we now charge a prorated amount for the remainder of\nthe billing period instead of the full new-plan price. Resolves the over-charging\ncomplaints on upgrades.\n\nJira: https://acme.atlassian.net/browse/BILL-377\n\n## How to test\n\n1. `npm install && npm run dev`\n2. Create a subscription on the basic plan, then upgrade to pro halfway through the cycle.\n3. Confirm the invoice shows a prorated charge, not the full pro price.\n4. Run `npm test -- proration` to exercise the unit tests.\n\n## Notes for reviewer\n\nStart in `src/billing/proration.ts` (the proration math); the invoice wiring in\n`invoice.service.ts` is thin. No breaking changes, no migrations.",
+    "author": { "username": "dgarcia", "name": "Diego Garcia" },
+    "state": "opened",
+    "source_branch": "feature/proration",
+    "target_branch": "main",
+    "work_in_progress": false,
+    "draft": false,
+    "labels": ["feature", "billing"],
+    "milestone": { "title": "Q2 Billing" },
+    "commits_count": 3,
+    "commit_summary": "3 commits: add proration math, wire invoice, add tests",
+    "approvals": { "approvals_required": 1, "approvals_left": 1, "approved_by": [] },
+    "merge_status": "can_be_merged",
+    "detailed_merge_status": "mergeable",
+    "has_conflicts": false,
+    "diverged_commits_count": 0
+  },
+  "list_merge_request_changed_files": [
+    { "path": "src/billing/proration.ts", "additions": 64, "deletions": 0 },
+    { "path": "src/billing/invoice.service.ts", "additions": 15, "deletions": 2 },
+    { "path": "src/billing/proration.test.ts", "additions": 104, "deletions": 0 }
+  ],
+  "get_merge_request_file_diff": {
+    "src/billing/proration.ts": "@@ -0,0 +1,64 @@\n+export function prorate(oldPlan: Plan, newPlan: Plan, daysLeft: number, cycleDays: number): number {\n+  const fraction = daysLeft / cycleDays;\n+  return Math.round((newPlan.price - oldPlan.price) * fraction);\n+}\n",
+    "src/billing/invoice.service.ts": "@@ -22,2 +22,15 @@\n+  const delta = prorate(current, target, daysLeft, cycleDays);\n+  invoice.addLine(\"Plan upgrade (prorated)\", delta);\n",
+    "src/billing/proration.test.ts": "@@ -0,0 +1,104 @@\n+import { prorate } from \"./proration\";\n+test(\"charges half the delta at mid-cycle\", () => {\n+  expect(prorate(basic, pro, 15, 30)).toBe(500);\n+});\n"
+  },
+  "list_merge_request_discussions": [],
+  "list_merge_request_pipelines": [
+    { "id": 9400, "status": "success", "ref": "feature/proration", "sha": "b11111ce" }
+  ],
+  "list_pipelines": [
+    { "id": 9400, "status": "success", "ref": "feature/proration", "sha": "b11111ce" }
+  ]
+}

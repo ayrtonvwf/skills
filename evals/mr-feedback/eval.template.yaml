@@ -3,7 +3,7 @@ description: Review-readiness scoring + read-only guardrails for the mr-feedback
 skill: mr-feedback
 version: "1.0"
 config:
-  trials_per_task: 2          # variance signal on LLM-judged tasks
+  trials_per_task: 3          # variance signal on LLM-judged tasks
   timeout_seconds: 300        # read-only task neared 180s in practice; 300 avoids flaky timeouts
   parallel: false
   executor: copilot-sdk

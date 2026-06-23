@@ -27,7 +27,10 @@ carried forward here).
   pinned to `report.md`.
 - **New task: `input-clarification`** — sends incomplete input (no MR URL, and a bare
   project path with no iid); the skill must ask for clarification rather than fetching,
-  guessing, or producing a report.
+  guessing, or producing a report. The skill legitimately activates on an MR-feedback
+  request, so this task asserts via `tool_constraint` (zero fetch tools called), a missing
+  report file, and a clarification prompt in the output — NOT a `forbidden_skills`
+  invocation check, which would falsely fail when the skill correctly engages and then asks.
 - **New fixture: `no-pipeline-mr.json`** — well-formed MR with empty
   `list_merge_request_pipelines` / `list_pipelines` responses.
 - **New fixture: `hygiene-markers-mr.json`** — diff with leftover TODOs and console.log
@@ -38,10 +41,11 @@ carried forward here).
 - **Grader hardening** — broaden `(?i)testing instruction` to
   `(?i)testing (instruction|step|guide|procedure|how to test)` in `not-ready-mr-flags-gaps`
   and `proof-of-run-rejects-tests` to reduce false negatives on valid phrasings.
-- **Grader-signal documentation** — document in `evals/README.md` the two interpretation
-  gotchas surfaced by prior runs: a no-verdict judge result that reports "All prompts
-  passed" alongside score 0, and a negative-mode `trigger` grader whose aggregate score is
-  not its pass rate.
+- **Grader-signal verification** — `evals/README.md` already documents the two
+  interpretation gotchas (the no-verdict judge that reports "All prompts passed" alongside
+  score 0, and the negative-mode `trigger` grader whose aggregate score is not its pass
+  rate) in its Gotchas section. This change verifies those entries still match observed
+  behavior and updates their wording only if it has drifted — it does not add new docs.
 - **Bump `trials_per_task` from 2 → 3** to reduce variance on LLM-judged graders.
 
 ## Capabilities
@@ -65,5 +69,6 @@ carried forward here).
 - `evals/mr-feedback/eval.template.yaml` — `trials_per_task` bump.
 - `evals/mr-feedback/tasks/not-ready-mr-flags-gaps.yaml` and
   `proof-of-run-rejects-tests.yaml` — grader pattern fix.
-- `evals/README.md` — grader-signal gotchas section.
+- `evals/README.md` — verify existing grader-signal gotchas section (wording-only update
+  if drifted; no new content expected).
 - No change to the skill itself or to `openspec/specs/`.

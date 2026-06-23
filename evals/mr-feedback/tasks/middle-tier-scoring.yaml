@@ -1,0 +1,41 @@
+id: middle-tier-scoring
+name: middle-tier-scoring
+description: A partially-prepared MR (good description and tests, but no proof-of-run) must land in a middle band (Almost ready / Needs prep), flag the missing proof-of-run, and not flag the items that are present.
+inputs:
+  prompt: |
+    Please give me MR feedback on this GitLab merge request:
+    https://gitlab.com/acme/billing-service/-/merge_requests/84
+
+    Write the report to `report.md` in the current working directory.
+graders:
+  - type: skill_invocation
+    name: mr-feedback-ran
+    config:
+      required_skills: ["mr-feedback"]
+      mode: any_order
+      allow_extra: true
+  - type: file
+    name: report-scores-mid-band
+    config:
+      must_exist: ["report.md"]
+      must_not_exist: []
+      content_patterns:
+        - path: "report.md"
+          must_match:
+            # Middle band: not Ready (proof-of-run missing) and not Not ready (good
+            # description and tests present).
+            - "\\*\\*Overall: \\d+/10 - (Almost ready|Needs prep)\\*\\*"
+            # The missing proof-of-run must surface as a required-item flag.
+            - "(?i)proof.?of.?run"
+            - "\\*\\*\\[important\\]\\*\\*"
+          must_not_match:
+            # Present items (Jira link, testing instructions) must NOT be flagged as
+            # MISSING gaps — only proof-of-run is. The qualifier must attach DIRECTLY to
+            # the item (adjacency or a copula), NOT merely co-occur: a proof-of-run gap
+            # legitimately mentions "the testing instructions", and the summary row lists
+            # items together ("testing instructions ✓, proof-of-run missing") where
+            # "missing" belongs to proof-of-run — neither must trip the grader.
+            - "(?i)(missing|no|absent|add|provide|include|lacks?|needs?)\\s+(a\\s+|the\\s+)?jira"
+            - "(?i)jira( link| card| ticket)?\\s+(is|are|was)\\s+(missing|absent|not (present|provided|included|linked))"
+            - "(?i)(missing|no|absent|add|provide|include|lacks?|needs?)\\s+(the\\s+|clear\\s+|any\\s+|proper\\s+)?testing (instruction|step|guide|procedure)"
+            - "(?i)testing (instruction|step|guide|procedure)s?\\s+(are|is|was|were)\\s+(missing|absent|not (present|provided|included|clear|given))"

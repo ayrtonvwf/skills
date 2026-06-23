@@ -1,0 +1,50 @@
+{
+  "get_merge_request": {
+    "iid": 91,
+    "project_id": "acme/payments-api",
+    "title": "Add idempotency keys to the refund endpoint",
+    "description": "## What & why\n\nAdds idempotency-key support to `POST /refunds` so a retried request never issues a\nduplicate refund. Resolves the duplicate-refund incidents seen during gateway timeouts.\n\nJira: https://acme.atlassian.net/browse/PAY-204\n\n## How to test\n\n1. `npm install && npm run dev`\n2. `POST /refunds` twice with the same `Idempotency-Key` header.\n3. Confirm the second call returns the first result and issues no second refund.\n4. Run `npm test -- refunds` to exercise the unit tests.\n\n## Proof it was run\n\nLog of the two requests showing the second short-circuits, plus the passing test run:\n\n```\nPOST /refunds key=abc123 -> 201 created refund re_1\nPOST /refunds key=abc123 -> 200 replayed refund re_1 (no new refund)\nPASS  src/refunds/idempotency.test.ts (9 tests)\nTest Suites: 1 passed, Tests: 9 passed\n```\n\n## Notes for reviewer\n\nStart in `src/refunds/idempotency.ts` (key storage + lookup); the handler change in\n`refunds.controller.ts` is thin. No breaking changes, no migrations.",
+    "author": { "username": "kpatel", "name": "Kiran Patel" },
+    "state": "opened",
+    "source_branch": "feature/refund-idempotency",
+    "target_branch": "main",
+    "work_in_progress": false,
+    "draft": false,
+    "labels": ["feature", "payments"],
+    "milestone": { "title": "Q2 Reliability" },
+    "commits_count": 3,
+    "commit_summary": "3 commits: add idempotency store, wire controller, add tests",
+    "approvals": { "approvals_required": 1, "approvals_left": 1, "approved_by": [] },
+    "merge_status": "can_be_merged",
+    "detailed_merge_status": "mergeable",
+    "has_conflicts": false,
+    "diverged_commits_count": 0
+  },
+  "list_merge_request_changed_files": [
+    { "path": "src/refunds/idempotency.ts", "additions": 72, "deletions": 0 },
+    { "path": "src/refunds/refunds.controller.ts", "additions": 16, "deletions": 3 },
+    { "path": "src/refunds/idempotency.test.ts", "additions": 88, "deletions": 0 }
+  ],
+  "get_merge_request_file_diff": {
+    "src/refunds/idempotency.ts": "@@ -0,0 +1,72 @@\n+export async function withIdempotency(key: string, fn: () => Promise<Refund>): Promise<Refund> {\n+  const existing = await store.get(key);\n+  if (existing) return existing;\n+  const result = await fn();\n+  await store.put(key, result);\n+  return result;\n+}\n",
+    "src/refunds/refunds.controller.ts": "@@ -18,3 +18,16 @@\n+  const key = req.header(\"Idempotency-Key\");\n+  return withIdempotency(key, () => this.refunds.issue(req.body));\n",
+    "src/refunds/idempotency.test.ts": "@@ -0,0 +1,88 @@\n+import { withIdempotency } from \"./idempotency\";\n+test(\"replays the stored result for a repeated key\", async () => {\n+  // ...\n+});\n"
+  },
+  "list_merge_request_discussions": [
+    {
+      "id": "d1",
+      "notes": [
+        {
+          "id": 5101,
+          "author": { "username": "areviewer" },
+          "body": "Clear write-up and the replay log makes the behavior obvious — thanks.",
+          "system": false,
+          "resolvable": true,
+          "resolved": true
+        }
+      ]
+    }
+  ],
+  "list_merge_request_pipelines": [],
+  "list_pipelines": []
+}

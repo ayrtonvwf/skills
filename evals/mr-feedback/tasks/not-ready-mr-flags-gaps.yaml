@@ -28,7 +28,7 @@ graders:
             - "\\*\\*\\[important\\]\\*\\*"
             # The three required items must each surface by name.
             - "(?i)jira"
-            - "(?i)testing instruction"
+            - "(?i)testing (instruction|step|guide|procedure|how to test)"
             - "(?i)proof.?of.?run"
             # Each gap explains why it matters to the author, not just what to fix.
             - "(?i)why it matters"

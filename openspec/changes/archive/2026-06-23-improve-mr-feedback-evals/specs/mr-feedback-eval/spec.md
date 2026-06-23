@@ -48,26 +48,35 @@ templated default (slug plus date plus timestamp) is exercised rather than alway
 #### Scenario: Default templated path is produced
 
 - **WHEN** the `default-output-path` eval task omits the report-path override
-- **THEN** the skill writes the report to a path matching the templated default and the
-  grader asserts a file matching that pattern exists
+- **THEN** the skill writes the report to the templated default path
+  (`mr-feedback/<project-slug>-mr-<iid>-<YYYY-MM-DD>-<TIMESTAMP>.md`) and the graders
+  confirm this without relying on glob support: a `file` grader asserts `report.md` does
+  NOT exist (the override path was not used), and a `text` grader asserts the path the
+  skill announces matches the deterministic portion of the template (slug, iid, and date),
+  ignoring the non-deterministic timestamp
 
 ### Requirement: Input clarification requested when input is incomplete
 
 The suite SHALL include at least one task that provides ambiguous or incomplete input, so
 the skill's behavior of asking before fetching is verified. The task SHALL cover both a
-request with no MR URL at all and a request with a bare project path and no MR iid.
+request with no MR URL at all and a request with a bare project path and no MR iid. Because
+the request is itself an MR-feedback request, the skill is expected to activate and then
+ask; the graders SHALL therefore verify the absence of fetching and report-writing via a
+`tool_constraint` grader (no fetch tools called) and a `file` grader (no report written),
+NOT via a `forbidden_skills` invocation check.
 
 #### Scenario: No MR URL provided
 
 - **WHEN** the `input-clarification` task sends a request with no MR URL or iid
-- **THEN** the skill asks the user for the MR URL or project details and does NOT invoke
-  the full review workflow or write a report file
+- **THEN** the skill asks the user for the MR URL or project details, no GitLab fetch tool
+  is called, and no report file is written
 
 #### Scenario: Bare project path with no iid
 
 - **WHEN** the task provides a bare project path with no MR iid
-- **THEN** the skill asks the user to clarify and does not fetch or guess, and the grader
-  confirms no fetch occurred and no report was written
+- **THEN** the skill asks the user to clarify and does not fetch or guess, and the graders
+  confirm via `tool_constraint` that no fetch occurred and via `file` that no report was
+  written
 
 ## MODIFIED Requirements
 
