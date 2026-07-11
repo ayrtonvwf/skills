@@ -54,6 +54,7 @@ and the [OpenSpec specs and changes](openspec/) under [`openspec/`](openspec/).
 | Skill | What it does |
 | ----- | ------------ |
 | [mr-feedback](skills/mr-feedback/SKILL.md) | Evaluates how ready a GitLab Merge Request is to be reviewed (via the GitLab MCP) and writes a paste-ready feedback report. Not a code review - it judges context, scope, tests acknowledgement, and reviewer guidance. Read-only by design. |
+| [clone-voice](skills/clone-voice/SKILL.md) | Analyzes a person's message corpus against a fixed style rubric, presents the findings as an inspectable voice profile, and generates a self-contained `write-as-<name>` skill that rewrites text in that voice. Meta-skill: its output is another skill. Carries embedded refusal rules and an ethics-banner-first flow. |
 
 ## Repository layout
 
